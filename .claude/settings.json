@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "CLAUDE_CODE_FORK_SUBAGENT": "0"
+  },
+  "permissions": {
+    "deny": [
+      "mcp__github__merge_pull_request",
+      "mcp__github__create_repository",
+      "mcp__github__fork_repository",
+      "mcp__github__delete_file",
+      "mcp__github__push_files",
+      "mcp__github__create_or_update_file",
+
+      "Bash(git push --force*)",
+      "Bash(git push * --force*)",
+      "Bash(git push -f*)",
+      "Bash(git push * -f*)",
+      "Bash(git push * +*)",
+      "Bash(git push * main)",
+      "Bash(git push * master)",
+      "Bash(git push * HEAD:main*)",
+      "Bash(git push * HEAD:master*)",
+      "Bash(git push * *:main)",
+      "Bash(git push * *:master)",
+      "Bash(git push --mirror*)",
+      "Bash(git push * --mirror*)",
+      "Bash(git push --delete*)",
+      "Bash(git push * --delete*)",
+      "Bash(git filter-branch*)",
+      "Bash(git filter-repo*)",
+
+      "Bash(gh pr merge*)",
+      "Bash(gh repo create*)",
+      "Bash(gh repo delete*)",
+      "Bash(gh repo edit*)",
+      "Bash(gh release*)",
+      "Bash(gh secret*)",
+      "Bash(gh variable*)",
+      "Bash(gh auth*)",
+      "Bash(gh api*)",
+
+      "Bash(npm publish*)",
+      "Bash(pnpm publish*)",
+      "Bash(yarn publish*)",
+      "Bash(twine upload*)",
+      "Bash(cargo publish*)",
+
+      "Bash(sudo *)",
+      "Bash(rm -rf /*)",
+      "Bash(rm *..*)",
+      "Bash(rm -rf ~*)",
+      "Bash(rm -rf $HOME*)",
+      "Bash(curl * | sh*)",
+      "Bash(curl * | bash*)",
+      "Bash(wget * | sh*)",
+      "Bash(wget * | bash*)",
+
+      "Read(**/.env*)",
+      "Edit(**/.env*)",
+      "Read(~/code/**/.env*)",
+      "Edit(~/code/**/.env*)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.config/gh/**)"
+    ],
+    "allow": [
+      "Bash(git push -u origin agent/*)",
+      "Bash(git push origin agent/*)",
+      "Bash(git push --set-upstream origin agent/*)"
+    ],
+    "ask": [
+      "Bash(git reset --hard*)",
+      "Bash(git clean*)",
+      "Bash(git rebase*)",
+      "Bash(git tag*)",
+      "Bash(rm -rf*)",
+
+      "Bash(npm install*)",
+      "Bash(npm i *)",
+      "Bash(npm ci*)",
+      "Bash(pnpm install*)",
+      "Bash(pnpm add*)",
+      "Bash(yarn add*)",
+      "Bash(yarn install*)",
+      "Bash(pip install*)",
+      "Bash(pip3 install*)",
+      "Bash(uv add*)",
+      "Bash(poetry add*)",
+      "Bash(brew *)",
+      "Bash(cargo install*)",
+      "Bash(go install*)",
+
+      "Bash(docker *)",
+      "Bash(vercel*)",
+      "Bash(netlify*)",
+      "Bash(fly *)",
+      "Bash(flyctl*)",
+      "Bash(firebase*)",
+      "Bash(wrangler*)",
+      "Bash(terraform*)",
+      "Bash(kubectl*)",
+      "Bash(aws *)",
+      "Bash(gcloud*)"
+    ]
+  }
+}
