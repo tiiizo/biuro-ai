@@ -8,7 +8,8 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
+  # Read-only: the action lists the PR's commits; comments are disabled below.
+  pull-requests: read
 
 jobs:
   scan:
@@ -18,8 +19,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
       - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Comments need pull-requests: write; the failed check and job summary are enough.
+          GITLEAKS_ENABLE_COMMENTS: "false"
           # Required only for repositories owned by an organization (free key from gitleaks.io).
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
