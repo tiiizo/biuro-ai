@@ -17,7 +17,7 @@ How to work on an issue:
 4. Push only your own branch and open a PR against the default branch (check the repository's PR template first). In the description: `Closes #<number>`, what changed, how it was tested, risks.
 5. Return to the director: PR link, test results, open risks.
 
-GitHub tools: prefer the GitHub MCP server. If it fails (for example `create_pull_request` reports that refs are not readable), use the `gh` CLI as a fallback: `gh pr create --base main --head agent/<n>-<slug> --body-file <file>`.
+GitHub tools: prefer the GitHub MCP server. If it fails (for example `create_pull_request` reports that refs are not readable), use the `gh` CLI as a fallback: `gh pr create --head agent/<n>-<slug> --body-file <file>` (without `--base`, `gh` targets the repository's default branch).
 
 Pull request rules (see `docs/lessons-learned.md`):
 - Never open stacked PRs (a PR whose base is another agent branch). Dependent changes go into one PR, or the next PR is opened after the previous one is merged.

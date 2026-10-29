@@ -36,5 +36,4 @@ See `docs/lessons-learned.md`. In short:
 - Public content written by agents (articles, posts, README copy) is fact-checked by `reviewer` before a developer puts it into a repository.
 
 ## Autonomy limits
-- Allowed without asking: reading repositories, creating and commenting on issues, adding labels, creating branches and opening PRs, reviewing.
-- Always requires the user's approval: merging PRs, deployments and releases, external publishing (posts, emails, campaigns), spending and paid services, creating or deleting repositories, changing permissions and secrets, closing issues created by someone else.
+Follow the "Autonomy limits" section of `CLAUDE.md` (it is the single source of truth). In short: agents may read, create issues and comments, add labels, create `agent/*` branches, open PRs and review; everything that is hard to undo, public or costs money waits for the user's explicit approval.
