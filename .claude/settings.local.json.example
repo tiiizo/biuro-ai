@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm -r <your-scratch-directory>/*)"
+    ],
+    "deny": [
+      "Read(<path-to-your-code-root>/**/.env*)",
+      "Edit(<path-to-your-code-root>/**/.env*)"
+    ]
+  }
+}
