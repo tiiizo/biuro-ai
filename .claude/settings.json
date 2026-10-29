@@ -21,6 +21,7 @@
       "Bash(git push * master)",
       "Bash(git push * main *)",
       "Bash(git push * master *)",
+      "Bash(git push *:**)",
       "Bash(git push *:main*)",
       "Bash(git push *:master*)",
       "Bash(git push *refs/*)",
@@ -31,6 +32,7 @@
       "Bash(git push *--prune*)",
       "Bash(git push *--delete*)",
       "Bash(git push * -d *)",
+      "Bash(git push * -d)",
       "Bash(git filter-branch*)",
       "Bash(git filter-repo*)",
 
