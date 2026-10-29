@@ -5,8 +5,24 @@
 - [Claude Code](https://code.claude.com/docs/en/setup), installed with one of the official methods from that page.
 - A Claude plan that includes Claude Code, or an API key. Subagents share your usage limits, so a director that starts many specialists uses them up faster.
 - Optional, for the GitHub workflow:
-  - the [GitHub MCP server](https://github.com/github/github-mcp-server) configured in Claude Code;
+  - the [GitHub MCP server](https://github.com/github/github-mcp-server) registered in Claude Code under the name `github` (see below);
   - the [GitHub CLI](https://cli.github.com/) (`gh`), used as a fallback when an MCP call fails.
+
+## GitHub MCP server: the name must be `github`
+
+Claude Code names MCP tools `mcp__<server-name>__<tool>`. Every agent's `tools:` list and the MCP deny rules in `.claude/settings.json` use `mcp__github__*`, so the server must be registered as `github`. If you register it under another name (for example `github-mcp`), the agents silently lose all GitHub tools and the deny rules (such as `mcp__github__merge_pull_request`) no longer match anything. If you must use another name, rename the tools in every agent file and in `settings.json` too.
+
+One way to register the remote server (see the [official guide](https://github.com/github/github-mcp-server/blob/main/docs/installation-guides/install-claude.md) for the Docker variant and current options):
+
+```sh
+export GITHUB_MCP_TOKEN=...   # a fine-grained token, see below; do not commit it
+claude mcp add --transport http github https://api.githubcopilot.com/mcp \
+  -H "Authorization: Bearer $GITHUB_MCP_TOKEN"
+```
+
+- Keep the default `local` scope (or `user`). Do not use `--scope project` with a literal token: that writes it to `.mcp.json` in the repository.
+- Use a fine-grained personal access token limited to the repositories the agents work on, with only the permissions they need (typically Contents, Issues and Pull requests read/write, Metadata read). No administration, secrets or workflow permissions. See "Least-privilege credentials" in [`SECURITY.md`](../SECURITY.md).
+- Check the result with `claude mcp list` and, inside Claude Code, `/mcp`.
 
 ## First run
 
@@ -27,7 +43,7 @@ To talk to one specialist directly, start it as the main agent, for example `cla
 ## Example prompts
 
 ```
-Analyse the launch of a new product. Delegate research to researcher,
+Analyze the launch of a new product. Delegate research to researcher,
 strategy to strategist and the budget to finance. Merge the results and
 separate facts from assumptions. Save the result in reports/.
 ```

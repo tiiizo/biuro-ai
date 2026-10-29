@@ -8,7 +8,7 @@ A **director** agent plans the work and delegates it to specialist subagents (pr
 
 This setup has been used to run several real projects (web, mobile, content). This repository is the generic, cleaned-up template: no project data, no memory, no reports.
 
-**Status:** basic version (v0.x). Expect the prompts and permission rules to change.
+**Status:** basic version (v0.x). Expect the prompts and permission rules to change. Tested with Claude Code 2.1.311 on macOS (October 2026).
 
 ## How it works
 
@@ -29,7 +29,7 @@ More in [docs/architecture.md](docs/architecture.md).
 ## Quick start
 
 1. Install [Claude Code](https://code.claude.com/docs/en/setup) and log in.
-2. Optional: configure the [GitHub MCP server](https://github.com/github/github-mcp-server) and install the [GitHub CLI](https://cli.github.com/) as a fallback.
+2. Optional: register the [GitHub MCP server](https://github.com/github/github-mcp-server) **under the name `github`** and install the [GitHub CLI](https://cli.github.com/) as a fallback. The agents and the deny rules refer to tools named `mcp__github__*`; with any other server name the GitHub tools silently disappear from the agents and the MCP deny rules stop matching. Setup and token scopes: [docs/getting-started.md](docs/getting-started.md#github-mcp-server-the-name-must-be-github).
 3. Create your own copy of this repository, then:
 
    ```sh
@@ -37,7 +37,7 @@ More in [docs/architecture.md](docs/architecture.md).
    claude --agent director
    ```
 
-4. Try: *"Analyse the launch of a new product. Delegate research to researcher, strategy to strategist and the budget to finance. Separate facts from assumptions and save the result in reports/."*
+4. Try: *"Analyze the launch of a new product. Delegate research to researcher, strategy to strategist and the budget to finance. Separate facts from assumptions and save the result in reports/."*
 
 Details: [docs/getting-started.md](docs/getting-started.md).
 
@@ -83,7 +83,7 @@ examples/                  a sample task and a sample report (fictional)
 
 ## Safety in one paragraph
 
-The permission rules in `.claude/settings.json` block merging, force pushes, pushes to `main`, releases, publishing and reading `.env` files, and ask before installing anything. They are a guardrail, not a sandbox: shell rules can be bypassed. Protect your default branch on GitHub, give agents least-privilege tokens and review every PR. Read [SECURITY.md](SECURITY.md) before you let agents work on real repositories.
+The permission rules in `.claude/settings.json` block merging, force pushes, pushes to `main`, tag pushes, releases, publishing and reading `.env` files, and ask before installing or downloading and running packages. They are a guardrail, not a sandbox: shell rules can be bypassed. Protect your default branch on GitHub, give agents least-privilege tokens and review every PR. Read [SECURITY.md](SECURITY.md) before you let agents work on real repositories.
 
 ## License
 
