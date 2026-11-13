@@ -207,7 +207,7 @@ export class Overlay {
     row.append(types, link ? externalLink(link, name, 'title') : el('span', name, 'title'));
     const days = taskDays(t, this.today);
     if (days !== undefined) row.append(el('span', waitingText(days), isAlarmTask(t, this.today) ? 'waiting alarm' : 'waiting'));
-    const copy = button('📋', 'copy', `Copy to clipboard: ${name}`);
+    const copy = button('Copy', 'copy', `Copy to clipboard: ${name}`);
     copy.title = COPY_HINT;
     copy.addEventListener('click', () => void this.copy(copy, clipboardText(room, t, this.today)));
     row.append(copy);
@@ -222,9 +222,9 @@ export class Overlay {
     this.announce(ok ? 'Text copied to the clipboard.' : `Could not copy. Text: ${text}`);
     this.toast.classList.toggle('error', !ok);
     this.toast.hidden = false;
-    b.textContent = ok ? '✓' : '!';
+    b.textContent = ok ? 'Copied' : 'Failed';
     window.setTimeout(() => {
-      b.textContent = '📋';
+      b.textContent = 'Copy';
     }, 1500);
     window.clearTimeout(this.toastTimer);
     this.toastTimer = window.setTimeout(() => {
@@ -279,7 +279,7 @@ export class Overlay {
       return;
     }
     items.push(
-      el('p', 'Tasks in every room, longest waiting first. 📋 copies a line for the conversation with the director in the terminal.', 'muted'),
+      el('p', 'Tasks in every room, longest waiting first. "Copy" copies a line for the conversation with the director in the terminal.', 'muted'),
     );
     for (const { floor } of floorOrder(this.office.floors)) {
       const section = el('section', undefined, 'list-floor');

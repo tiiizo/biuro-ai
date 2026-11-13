@@ -93,7 +93,7 @@ DOM only through `textContent`.
 - **Click on a room** (without dragging): a side panel with the full task list, sorted by days waiting or by type
   (`[B]` > `[?]` > `[YOU]` > `[AI]` > `[..]`), with links to GitHub (from `link:`, or without it from `repo` and
   the number). **Esc** closes the panel and returns focus to where it was opened from.
-- **📋 next to a task** copies a line for the conversation with the director in the terminal (`clipboardText`,
+- **"Copy" next to a task** copies a line for the conversation with the director in the terminal (`clipboardText`,
   `src/tasks.ts`): `[room] #19 title (waiting 15 days) — context: … — let's discuss.` Always one line: control
   characters and newlines from `office.md` become spaces, so pasting cannot send a command in the terminal.
   Links in the panel lead only to `https://github.com/`; other links are hidden and listed in the header warnings.
