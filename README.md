@@ -10,6 +10,24 @@ This setup has been used to run several real projects (web, mobile, content). Th
 
 **Status:** basic version (v0.x). Expect the prompts and permission rules to change. Tested with Claude Code 2.1.311 on macOS (October 2026).
 
+## Office dashboard
+
+![The office as an isometric pixel-art building: one floor per project family, one room per repository](docs/screenshots/building.png)
+
+A local, isometric pixel-art view of the whole office. Every repository is a room, every family of projects is a floor, and the agents sit at their desks. Rooms grow with the number of open issues and pull requests (10 levels), furniture follows each project's theme, and a red alarm lamp lights up when a blocking task or an owner decision has waited more than 7 days. Hover a room for its key tasks, click it for the full list with GitHub links, or switch to a keyboard- and screen-reader-friendly list view.
+
+| Room close-up | Task panel |
+|---|---|
+| ![Close-up of a room with agents at their desks](docs/screenshots/room-closeup.png) | ![Side panel with all tasks of a room](docs/screenshots/panel.png) |
+
+The data comes from `office.md` in the repository root. The `office-manager` agent writes it from GitHub (read-only), and the dashboard reloads on every save. The `office.md` shipped here describes a fictional company, so you can try it right away:
+
+```sh
+cd dashboard && npm ci && npm run dev
+```
+
+Then ask the director to "update the office". An optional daily run with launchd (macOS) is described in [dashboard/README.md](dashboard/README.md), together with the `office.md` format and all features.
+
 ## How it works
 
 ```mermaid
@@ -55,6 +73,7 @@ Details: [docs/getting-started.md](docs/getting-started.md).
 | `developer-example` | template for a per-project developer | yes | branches, PRs |
 | `reviewer` | PR review, report review, fact-checking | no | reviews |
 | `translator` | translations and translation review | no | no |
+| `office-manager` | writes `office.md` for the office dashboard | no | read |
 
 All agents reply in the user's language. Code, commits, issues and PRs are in English.
 
@@ -67,9 +86,11 @@ SECURITY.md                threat model and what really protects you
 .claude/agents/            one file per agent
 knowledge/<agent>/         curated input you maintain
 reports/                   results you keep (git-ignored except README)
+office.md                  data for the office dashboard (fictional sample)
+dashboard/                 isometric office dashboard (Vite, three.js)
 docs/                      how it works and how to extend it
 examples/                  a sample task and a sample report (fictional)
-.github/                   issue and PR templates, labels, gitleaks workflow
+.github/                   issue and PR templates, labels, gitleaks and dashboard workflows
 ```
 
 ## Docs
@@ -80,6 +101,7 @@ examples/                  a sample task and a sample report (fictional)
 - [Autonomy and permissions](docs/autonomy-and-permissions.md)
 - [Memory](docs/memory.md)
 - [Lessons learned](docs/lessons-learned.md)
+- [Office dashboard](dashboard/README.md)
 
 ## Safety in one paragraph
 

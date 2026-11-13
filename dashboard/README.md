@@ -12,7 +12,7 @@ in this template describes a fictional company (Acme Studio) so you can try the 
 
 | Room close-up | Tooltip |
 |---|---|
-| ![Close-up of the Client shop room](../docs/screenshots/room-closeup.png) | ![Tooltip above a room](../docs/screenshots/tooltip.png) |
+| ![Close-up of the Mobile app room](../docs/screenshots/room-closeup.png) | ![Tooltip above a room](../docs/screenshots/tooltip.png) |
 
 | Side panel | List view |
 |---|---|
