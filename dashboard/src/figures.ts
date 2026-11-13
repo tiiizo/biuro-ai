@@ -2,16 +2,16 @@
 // test/figures.test.ts.
 import { hash } from './palette';
 
-/** Outfit color by role. Role = the agent name or its first part (developer-shop → developer). */
+/** Outfit color by role. Role = the agent name or its first part (developer-web → developer). */
 export const ROLE_COLORS: Readonly<Record<string, string>> = {
-  director: '#2b2d42',
-  developer: '#3a86ff',
+  director: '#2c2e47',
+  developer: '#3b82f6',
   'product-owner': '#ffb703',
   marketing: '#ff5d8f',
   reviewer: '#2a9d8f',
   researcher: '#8338ec',
   'office-manager': '#f77f00',
-  translator: '#06d6a0',
+  translator: '#0fc79a',
   finance: '#588157',
   strategist: '#9d4edd',
 };

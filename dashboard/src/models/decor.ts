@@ -140,7 +140,7 @@ export const diploma: Model = {
   },
 };
 
-/** School chalkboard with a simple sum (theme: classroom, school, lesson). */
+/** School chalkboard with a chalk sketch (theme: classroom, school, lesson). */
 export const chalkboard: Model = {
   spot: 'wall',
   width: 1,
@@ -150,18 +150,18 @@ export const chalkboard: Model = {
     k.b(0.4, 10.5, 0, 7.2, 6.4, 0.4, '#2d5a3d');
     frame(k, 0.2, 10.3, 7.6, 6.8, M.wood);
     k.b(0.2, 10.1, 0, 7.6, 0.4, 1.4, M.wood);
-    // "1+2=3" in chalk, in pixels.
+    // A chalk sketch: a little house with a stepped roof and a sun, no text.
     const chalk = '#f1f1e6';
-    const y = 13.4;
-    k.b(1.6, y, 0.4, 0.3, 1.9, 0.05, chalk).b(1.3, y + 1.4, 0.4, 0.3, 0.3, 0.05, chalk);
-    k.b(2.4, y + 0.5, 0.4, 0.8, 0.3, 0.05, '#ffd166').b(2.65, y + 0.25, 0.4, 0.3, 0.8, 0.05, '#ffd166');
-    k.b(3.5, y + 1.6, 0.4, 1.0, 0.3, 0.05, chalk).b(4.2, y + 0.8, 0.4, 0.3, 0.8, 0.05, chalk);
-    k.b(3.5, y + 0.8, 0.4, 1.0, 0.3, 0.05, chalk).b(3.5, y, 0.4, 0.3, 0.8, 0.05, chalk).b(3.5, y, 0.4, 1.0, 0.3, 0.05, chalk);
-    k.b(4.9, y + 0.9, 0.4, 0.8, 0.25, 0.05, chalk).b(4.9, y + 0.4, 0.4, 0.8, 0.25, 0.05, chalk);
-    k.b(6.0, y + 1.6, 0.4, 1.0, 0.3, 0.05, chalk).b(6.2, y + 0.8, 0.4, 0.8, 0.3, 0.05, chalk);
-    k.b(6.0, y, 0.4, 1.0, 0.3, 0.05, chalk).b(6.7, y, 0.4, 0.3, 1.9, 0.05, chalk);
+    const y = 12.6;
+    k.b(1.4, y, 0.4, 2.6, 0.25, 0.05, chalk).b(1.4, y, 0.4, 0.25, 1.8, 0.05, chalk).b(3.75, y, 0.4, 0.25, 1.8, 0.05, chalk);
+    k.b(2.4, y, 0.4, 0.6, 0.9, 0.05, chalk);
+    k.b(1.2, y + 1.8, 0.4, 3.0, 0.25, 0.05, chalk).b(1.7, y + 2.3, 0.4, 2.0, 0.25, 0.05, chalk);
+    k.b(2.2, y + 2.8, 0.4, 1.0, 0.25, 0.05, chalk);
+    k.b(5.3, y + 2.0, 0.4, 1.0, 1.0, 0.05, M.yellow).b(5.05, y + 2.4, 0.4, 0.15, 0.2, 0.05, M.yellow);
+    k.b(6.4, y + 2.4, 0.4, 0.15, 0.2, 0.05, M.yellow).b(5.7, y + 3.15, 0.4, 0.2, 0.15, 0.05, M.yellow);
+    k.b(5.7, y + 1.65, 0.4, 0.2, 0.15, 0.05, M.yellow);
     k.b(1.0, 11.4, 0.4, 5.6, 0.25, 0.05, '#8fbf9f');
-    k.b(1.0, 12.2, 0.4, 3.2, 0.25, 0.05, '#8fbf9f');
+    k.b(1.0, 12.0, 0.4, 3.2, 0.25, 0.05, '#8fbf9f');
     return k.list;
   },
 };

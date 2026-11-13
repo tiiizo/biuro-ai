@@ -28,13 +28,13 @@ function t(types: Task['types'], number: number | undefined, waitingSince?: stri
 
 describe('clipboardText', () => {
   it('full format: [room] #N title (waiting N days) — context: … — let\'s discuss.', () => {
-    const task = t(['B', 'YOU'], 41, '2026-10-29', {
-      title: 'Lawyer: review the privacy policy',
-      context: 'blocks #44 and #47; the client talks to the lawyer.',
+    const task = t(['B', 'YOU'], 52, '2026-10-29', {
+      title: 'Forecast provider: free tier or paid plan',
+      context: 'blocks #55 and #58; the owner compares the offers.',
     });
     // The prefix is the room name from office.md (as in the dashboard), not the repository name.
-    expect(clipboardText({ name: 'Client shop' }, task, TODAY)).toBe(
-      "[Client shop] #41 Lawyer: review the privacy policy (waiting 15 days) — context: blocks #44 and #47; the client talks to the lawyer — let's discuss.",
+    expect(clipboardText({ name: 'Weather app' }, task, TODAY)).toBe(
+      "[Weather app] #52 Forecast provider: free tier or paid plan (waiting 15 days) — context: blocks #55 and #58; the owner compares the offers — let's discuss.",
     );
   });
 

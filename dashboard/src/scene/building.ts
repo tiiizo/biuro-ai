@@ -57,7 +57,7 @@ function grounds(k: Blocks, l: BuildingLayout): void {
   const x1 = Math.ceil(g.maxX) + m;
   const z1 = Math.ceil(g.maxZ) + m;
   const y = -SLAB_THICKNESS;
-  // A 2×2 checkered lawn and a pavement around the building.
+  // A checkered lawn (two by two tiles) and a pavement around the building.
   for (let x = x0; x < x1; x += 2) {
     for (let z = z0; z < z1; z += 2) {
       const c = ((x - x0) / 2 + (z - z0) / 2) % 2 === 0 ? BUILDING_COLORS.grass : BUILDING_COLORS.grassB;
@@ -124,8 +124,8 @@ function core(k: Blocks, s: Blocks, f: FloorLayout, cabin: boolean): void {
   k.b(r.x + 0.5, y + 1.5, r.z + sd - 0.1, 1.0, 0.1, 0.09, c.coreFrame);
   // Button panel next to the doors and the floor light above them.
   k.b(r.x + 1.6, y + 0.8, r.z + sd - 0.06, 0.12, 0.25, 0.06, c.coreFrame);
-  k.b(r.x + 1.63, y + 0.88, r.z + sd - 0.03, 0.06, 0.06, 0.04, '#ffd166');
-  k.b(r.x + 0.92, y + 1.68, r.z + sd - 0.06, 0.16, 0.12, 0.06, '#ffd166');
+  k.b(r.x + 1.63, y + 0.88, r.z + sd - 0.03, 0.06, 0.06, 0.04, '#ffcf56');
+  k.b(r.x + 0.92, y + 1.68, r.z + sd - 0.06, 0.16, 0.12, 0.06, '#ffcf56');
   // Side panes of the shaft.
   s.b(r.x + 0.02, y, r.z + 0.15, 0.06, h - 0.12, sd - 0.27, c.glass);
   s.b(r.x + r.w - 0.08, y, r.z + 0.15, 0.06, h - 0.12, sd - 0.27, c.glass);

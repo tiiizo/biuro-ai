@@ -1,7 +1,8 @@
 <!--
   Sample office for the dashboard (dashboard/README.md). Acme Studio is a fictional company: all rooms,
-  repositories, tasks and numbers below are made up. In your copy the office-manager agent
-  (.claude/agents/office-manager.md) overwrites this file with data from your GitHub repositories.
+  repositories, tasks and numbers below are made up. Your own office.md (git-ignored) is written by the
+  office-manager agent (.claude/agents/office-manager.md) from your GitHub repositories; until it exists,
+  the dashboard shows this file.
   open = open issues + open pull requests (drafts included) at the time of "updated". All dates and times are UTC.
   "waiting since": created_at for [B], [?] and [YOU]; updated_at for [AI] and [..].
 -->
@@ -11,92 +12,95 @@
 ## Floor: Headquarters
 
 ### Room: Director
-- repo: example-org/office · open: 7
-- agents: director, office-manager, product-owner, reviewer
-- theme: corner office with a map of the project portfolio and a view over the whole building
-- colors: #2b2d42 #8d99ae #edf2f4 #ef233c
-- props: big-desk, world-map, kanban-board, bookshelf, plant
+- repo: example-org/office · open: 6
+- agents: director, office-manager, developer, product-owner
+- theme: bright corner office with a roadmap wall and a view over the whole building
+- colors: #1b4332 #52b788 #d8f3dc #ffb703
+- props: big-desk, kanban-board, armchair, clock, plant
 
 #### Tasks
-- [?] #12 approve the priorities for the next quarter | waiting since: 2026-11-02 | link: https://github.com/example-org/office/issues/12
-  > context: the director proposed three goals; #14 and #15 wait for this decision.
-- [B][AI] #14 weekly review report template | waiting since: 2026-11-10 | link: https://github.com/example-org/office/issues/14
-  > context: blocks #15.
-- [AI] #15 automate the weekly review | waiting since: 2026-11-11 | link: https://github.com/example-org/office/issues/15
-- [..] #16 onboarding guide for new agents | waiting since: 2026-11-12 | link: https://github.com/example-org/office/pull/16
+- [?] #21 pick the two goals for the next quarter | waiting since: 2026-11-03 | link: https://github.com/example-org/office/issues/21
+  > context: the director proposed three options; #23 and #24 wait for this decision.
+- [B][AI] #23 template for the monthly status report | waiting since: 2026-11-10 | link: https://github.com/example-org/office/issues/23
+  > context: blocks #24.
+- [AI] #24 automate the monthly status report | waiting since: 2026-11-11 | link: https://github.com/example-org/office/issues/24
+- [..] #26 checklist for adding a new repository | waiting since: 2026-11-12 | link: https://github.com/example-org/office/pull/26
 
-### Room: Strategy
-- agents: strategist, researcher, finance
-- theme: quiet study with market reports and a pricing calculator
-- colors: #355070 #6d597a #eaac8b
-- props: bookshelf, globe, calendar
+## Floor: Client work
 
-## Floor: Clients
-
-### Room: Client shop
-- repo: example-org/client-shop · open: 19
-- agents: developer-shop, marketing, product-owner
-- theme: online shop for handmade furniture, busy before the holidays
-- colors: #264653 #2a9d8f #e9c46a #f4a261
-- props: dual-monitors, parcels, shopping-cart, coffee-machine, mug
+### Room: Docs site
+- repo: example-org/docs-site · open: 8
+- agents: developer, researcher, translator
+- theme: quiet studio with a reading lamp and printed API references for a product documentation site
+- colors: #3c096c #9d4edd #e0aaff
+- props: monitor, bookshelf, lamp, file-cabinet
 
 #### Tasks
-- [B][YOU] #41 sign the contract with the payment provider | waiting since: 2026-10-27 | link: https://github.com/example-org/client-shop/issues/41
-  > context: blocks #44 and #47; the client sends the signed contract.
-- [?] #38 one courier or two | waiting since: 2026-11-09 | link: https://github.com/example-org/client-shop/issues/38
-  > context: two couriers mean a second integration and higher fees.
-- [YOU] #50 review the checkout copy | waiting since: 2026-11-12 | link: https://github.com/example-org/client-shop/pull/50
-- [AI] #44 product filters on mobile | waiting since: 2026-11-11 | link: https://github.com/example-org/client-shop/issues/44
-- [..] #47 payment integration | waiting since: 2026-11-12 | link: https://github.com/example-org/client-shop/pull/47
+- [YOU] #31 approve the new navigation structure | waiting since: 2026-11-04 | link: https://github.com/example-org/docs-site/pull/31
+- [?] #29 versioned docs or a single latest version | waiting since: 2026-11-07 | link: https://github.com/example-org/docs-site/issues/29
+- [AI] #33 search over code samples | waiting since: 2026-11-11 | link: https://github.com/example-org/docs-site/issues/33
+- [..] #35 translated getting-started guide | waiting since: 2026-11-12 | link: https://github.com/example-org/docs-site/pull/35
 
-### Room: Website
-- repo: example-org/website · open: 9
-- agents: developer, translator, marketing
-- theme: bright studio for a company website in five languages
-- colors: #3a0ca3 #4cc9f0 #f72585 #ffffff
-- props: monitor, poster, globe, lamp
+### Room: Example site
+- repo: example-org/example-site · open: 3
+- agents: developer-example, marketing
+- theme: small agency desk with sketches for a client landing page
+- colors: #0077b6 #90e0ef #caf0f8
+- props: laptop, poster, cork-board
 
 #### Tasks
-- [?] #23 pick the hero image for the home page | waiting since: 2026-11-05 | link: https://github.com/example-org/website/issues/23
-- [AI] #27 translate the pricing page | waiting since: 2026-11-10 | link: https://github.com/example-org/website/issues/27
-- [..] #29 faster image loading | waiting since: 2026-11-12 | link: https://github.com/example-org/website/pull/29
+- [?] #12 one call to action or two | waiting since: 2026-11-08 | link: https://github.com/example-org/example-site/issues/12
+- [AI] #14 contact form validation | waiting since: 2026-11-12 | link: https://github.com/example-org/example-site/issues/14
 
 ## Floor: Products
 
-### Room: Mobile app
-- repo: example-org/mobile-app · open: 27
-- agents: developer-app, product-owner, reviewer, researcher
-- theme: app lab with test phones and a classroom corner for the learning game
-- colors: #ff6b35 #004e89 #f7f7ff
-- props: laptop, phone, robot, kanban-board, toys
+### Room: Weather app
+- repo: example-org/weather-app · open: 17
+- agents: developer, product-owner, researcher
+- theme: rooftop lab with weather instruments, test phones and a big forecast screen
+- colors: #023e8a #48cae4 #ade8f4 #fb8500
+- props: phone, dual-monitors, globe, calendar, coffee-machine
 
 #### Tasks
-- [B][?] #61 offline mode: sync on every launch or on demand | waiting since: 2026-11-01 | link: https://github.com/example-org/mobile-app/issues/61
-  > context: blocks #64, #66 and #70.
-- [YOU] #72 store listing screenshots | waiting since: 2026-11-08 | link: https://github.com/example-org/mobile-app/issues/72
-- [AI] #64 local database migration | waiting since: 2026-11-12 | link: https://github.com/example-org/mobile-app/issues/64
-- [AI] #66 sound settings screen | waiting since: 2026-11-11 | link: https://github.com/example-org/mobile-app/issues/66
-- [..] #73 accessibility fixes | waiting since: 2026-11-13 | link: https://github.com/example-org/mobile-app/pull/73
+- [B][?] #52 forecast provider: free tier or paid plan | waiting since: 2026-10-30 | link: https://github.com/example-org/weather-app/issues/52
+  > context: blocks #55, #58 and #60.
+- [YOU] #61 review the onboarding screens | waiting since: 2026-11-10 | link: https://github.com/example-org/weather-app/pull/61
+- [AI] #55 hourly forecast chart | waiting since: 2026-11-12 | link: https://github.com/example-org/weather-app/issues/55
+- [AI] #58 severe weather notifications | waiting since: 2026-11-11 | link: https://github.com/example-org/weather-app/issues/58
+- [..] #63 widget for the home screen | waiting since: 2026-11-13 | link: https://github.com/example-org/weather-app/pull/63
 
-### Room: Blog
-- repo: example-org/blog · open: 3
-- agents: marketing, translator
-- theme: small newsroom with a photo corner
-- colors: #6d597a #b56576 #eaac8b
-- props: laptop, cork-board, mug
+### Room: Design system
+- repo: example-org/design-system · open: 6
+- agents: developer, product-owner
+- theme: colorful design studio with swatches on the walls and a component wall
+- colors: #6a4c93 #ff595e #8ac926 #1982c4
+- props: desk, poster, kanban-board, sofa
 
 #### Tasks
-- [?] #8 publish two posts a month or one | waiting since: 2026-11-06 | link: https://github.com/example-org/blog/issues/8
-- [AI] #9 post: how we plan a release | waiting since: 2026-11-12 | link: https://github.com/example-org/blog/issues/9
+- [?] #18 rename the color tokens before 1.0 | waiting since: 2026-11-06 | link: https://github.com/example-org/design-system/issues/18
+- [AI] #20 dark theme for the button set | waiting since: 2026-11-12 | link: https://github.com/example-org/design-system/issues/20
+- [..] #22 accessible focus styles | waiting since: 2026-11-12 | link: https://github.com/example-org/design-system/pull/22
+
+### Room: Storefront demo
+- repo: example-org/storefront-demo · open: 4
+- agents: developer, marketing
+- theme: demo counter for a sample e-commerce stack, with a dashboard of fake orders
+- colors: #3d348b #7678ed #f7b801
+- props: monitor, server, mug, plant
+
+#### Tasks
+- [AI] #7 seed data for the demo catalog | waiting since: 2026-11-09 | link: https://github.com/example-org/storefront-demo/issues/7
+- [..] #9 load test for the cart API | waiting since: 2026-11-12 | link: https://github.com/example-org/storefront-demo/pull/9
 
 ## Floor: Internal
 
 ### Room: Infrastructure
-- repo: example-org/infra · open: 1
+- repo: example-org/infra · open: 2
 - agents: developer
 - theme: tidy server room with blinking lights
-- colors: #22223b #4a4e69 #c9ada7
-- props: router, printer
+- colors: #283618 #606c38 #dda15e
+- props: router, printer, binders
 
 #### Tasks
 - [AI] #5 renew the staging certificates | waiting since: 2026-11-09 | link: https://github.com/example-org/infra/issues/5
+- [AI] #6 nightly backup check | waiting since: 2026-11-10 | link: https://github.com/example-org/infra/issues/6

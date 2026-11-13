@@ -8,7 +8,7 @@ import sample from './fixtures/office.md?raw';
 import readme from '../README.md?raw';
 import officeManager from '../../.claude/agents/office-manager.md?raw';
 
-const palettes = [roomPalette([]), roomPalette(['#111111', '#e63946', '#f1faee']), roomPalette(['#0b3d91', '#f5a623'])];
+const palettes = [roomPalette([]), roomPalette(['#101010', '#e5383b', '#fafaf0']), roomPalette(['#0a3a7a', '#f2a541'])];
 
 describe('model library', () => {
   it('every prop from src/props.ts has its own model (not the fallback)', () => {

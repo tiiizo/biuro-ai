@@ -52,7 +52,7 @@ SHAs, no secrets, artifacts or cache (`dist/` contains your `office.md`). `npm r
   laptop. The loop draws at most 30 frames per second, and without animation only after the view changes.
 - **Building** (`src/layout.ts`, a pure function with property tests): floors are layers of a cross-section, and
   the floor named `Headquarters` is always at the bottom. The core (an elevator shaft with a machine room and an
-  antenna on the roof, 2×2 tiles) stands in the same place on every floor; the rooms stand around it: in the back
+  antenna on the roof, two by two tiles) stands in the same place on every floor; the rooms stand around it: in the back
   row alternately right and left (up to 2 per side), then in rows towards the front (up to 5, centred). The room
   whose name contains `Director` stands in the middle of Headquarters, on the core axis, in front of the
   elevator, one size level larger and with a golden floor border. Rooms are separated by a 1-tile corridor. The
@@ -130,11 +130,11 @@ DOM only through `textContent`.
   back-left corner), never in the aisle, at the walk target or in the line of sight to the director at the big
   desk (`standingSpots`, property test for levels 1–10 and 1–6 agents).
 - **Figures** (`src/figures.ts`): the agents from `agents:`; outfit color by role (role = the agent name or its
-  first part, e.g. `developer-shop` → developer), skin and hair chosen deterministically from the name.
+  first part, e.g. `developer-web` → developer), skin and hair chosen deterministically from the name.
 
   | role | director | developer | product-owner | marketing | reviewer | researcher | office-manager | translator | finance | strategist |
   |---|---|---|---|---|---|---|---|---|---|---|
-  | outfit | `#2b2d42` | `#3a86ff` | `#ffb703` | `#ff5d8f` | `#2a9d8f` | `#8338ec` | `#f77f00` | `#06d6a0` | `#588157` | `#9d4edd` |
+  | outfit | `#2c2e47` | `#3b82f6` | `#ffb703` | `#ff5d8f` | `#2a9d8f` | `#8338ec` | `#f77f00` | `#0fc79a` | `#588157` | `#9d4edd` |
 
   Animation: sits at the desk (9–15 s), walks along the aisle to the board, stands there (3–5 s) and walks back;
   phases are shifted by name, so the figures do not walk in step. With `prefers-reduced-motion` or
@@ -161,19 +161,19 @@ throws.
 
 ### Room: Director
 - agents: director, reviewer · theme: office with a view
-- colors: #2b2d42 #edf2f4
+- colors: #1b4332 #d8f3dc
 - props: big-desk, bookshelf, plant
 
 ## Floor: Clients
 
-### Room: Demo shop
-- repo: example-org/demo-shop · open: 9
+### Room: Demo app
+- repo: example-org/demo-app · open: 9
 - agents: developer
 
 #### Tasks
-- [B][YOU] #123 answers from the client | waiting since: 2026-01-15 | link: https://github.com/example-org/demo-shop/issues/123
-  > context: payments, shipping, DNS
-- [?] one courier or two
+- [B][YOU] #123 answers from the client | waiting since: 2026-01-15 | link: https://github.com/example-org/demo-app/issues/123
+  > context: hosting, API keys, DNS
+- [?] dark mode now or later
 - [..] staging
 ```
 

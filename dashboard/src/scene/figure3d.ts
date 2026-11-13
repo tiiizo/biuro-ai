@@ -20,7 +20,7 @@ function head(k: Blocks, l: Look, y: number): void {
 function torso(k: Blocks, l: Look, y: number): void {
   k.b(-2, y, -1, 4, 4.5, 2, l.outfit);
   // Collar / the director's tie.
-  if (l.role === 'director') k.b(-0.3, y + 1.8, 1, 0.6, 2.6, 0.1, '#e63946').b(-1, y + 4, 1, 2, 0.5, 0.1, '#f4f1ea');
+  if (l.role === 'director') k.b(-0.3, y + 1.8, 1, 0.6, 2.6, 0.1, '#e5383b').b(-1, y + 4, 1, 2, 0.5, 0.1, '#f4f1ea');
   else k.b(-1, y + 4, 1, 2, 0.5, 0.1, darken(l.outfit, 0.2));
 }
 

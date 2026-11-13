@@ -6,8 +6,8 @@ import sample from './fixtures/office.md?raw';
 describe('role and outfit color', () => {
   it.each([
     ['developer', 'developer'],
-    ['developer-shop', 'developer'],
-    ['developer-app', 'developer'],
+    ['developer-web', 'developer'],
+    ['developer-api', 'developer'],
     ['product-owner', 'product-owner'],
     ['office-manager', 'office-manager'],
     ['marketing', 'marketing'],

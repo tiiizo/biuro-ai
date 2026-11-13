@@ -11,12 +11,12 @@
 
 ## Floor: Projects
 
-### Room: Demo shop
-- repo: example-org/demo-shop · open: 9
+### Room: Demo app
+- repo: example-org/demo-app · open: 9
 - agents: developer, reviewer
 
 #### Tasks
-- [B][YOU] #123 answers from the client | waiting since: 2026-01-15 | link: https://example.com/example-org/demo-shop/issues/123
-  > context: payments, shipping, DNS
-- [?] courier yes or no
+- [B][YOU] #123 answers from the client | waiting since: 2026-01-15 | link: https://example.com/example-org/demo-app/issues/123
+  > context: hosting, API keys, DNS
+- [?] dark mode yes or no
 - [..] staging | link: https://example.com/a?b=c

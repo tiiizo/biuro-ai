@@ -10,10 +10,10 @@ describe('roomPalette', () => {
     [],
     ['#fff'],
     ['#000000'],
-    ['#2b2d42', '#8d99ae', '#edf2f4', '#ef233c'],
-    ['#0b3d91', '#f5a623', '#ffffff'],
-    ['#111111', '#e63946', '#f1faee'],
-    ['#ffbe0b', '#3a86ff', '#ff006e'],
+    ['#2c2e47', '#8b98ad', '#eef0f6', '#d90429'],
+    ['#0a3a7a', '#f2a541', '#ffffff'],
+    ['#101010', '#e5383b', '#fafaf0'],
+    ['#fcbf49', '#3b82f6', '#f72585'],
     ['#123', '#456', '#789', '#abc', '#def', '#000'],
   ];
 
@@ -23,7 +23,7 @@ describe('roomPalette', () => {
   });
 
   it('is deterministic', () => {
-    expect(roomPalette(['#0b3d91', '#f5a623'])).toEqual(roomPalette(['#0b3d91', '#f5a623']));
+    expect(roomPalette(['#0a3a7a', '#f2a541'])).toEqual(roomPalette(['#0a3a7a', '#f2a541']));
   });
 
   it('floor and walls are light (a readable cross-section), trim darker than the floor', () => {
@@ -36,8 +36,8 @@ describe('roomPalette', () => {
   });
 
   it('the accent comes from the project colors when there is a saturated one', () => {
-    expect(roomPalette(['#111111', '#e63946', '#f1faee']).accent).toBe('#e63946');
-    expect(roomPalette(['#0b3d91', '#f5a623', '#ffffff']).accent).toBe('#f5a623');
+    expect(roomPalette(['#101010', '#e5383b', '#fafaf0']).accent).toBe('#e5383b');
+    expect(roomPalette(['#0a3a7a', '#f2a541', '#ffffff']).accent).toBe('#f2a541');
   });
 
   it('different palettes in office.md give different walls', () => {

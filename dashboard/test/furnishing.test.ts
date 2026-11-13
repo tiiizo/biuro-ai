@@ -315,7 +315,7 @@ describe('furnishingWarnings', () => {
 
 describe('themeExtras', () => {
   it.each([
-    ['classroom with a times table', 'chalkboard'],
+    ['classroom for evening courses', 'chalkboard'],
     ['bright food photography studio', 'camera'],
     ['school maths club', 'chalkboard'],
     ['product photos', 'camera'],

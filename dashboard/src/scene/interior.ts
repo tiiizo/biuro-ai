@@ -72,9 +72,9 @@ function alarmLamp(sr: SceneRoom, material: MeshBasicMaterial, dome: MeshBasicMa
   const l = sr.layout;
   const y = sr.floor.y + FLOOR;
   const post = new Blocks()
-    .b(0, 0, 0, 2.4, 0.6, 2.4, '#2b2d42')
-    .b(0.8, 0.6, 0.8, 0.8, 13, 0.8, '#3d405b')
-    .b(0.2, 13.6, 0.2, 2, 0.6, 2, '#2b2d42').list;
+    .b(0, 0, 0, 2.4, 0.6, 2.4, '#2c2e47')
+    .b(0.8, 0.6, 0.8, 0.8, 13, 0.8, '#3e4260')
+    .b(0.2, 13.6, 0.2, 2, 0.6, 2, '#2c2e47').list;
   const beacon = new Blocks().b(0.3, 14.2, 0.3, 1.8, 1.8, 1.8, '#ff2d2d').b(0.7, 16, 0.7, 1, 0.5, 1, '#ff8a8a').list;
   const spot = alarmPosition(l);
   const position: [number, number, number] = [spot.lamp.x, y, spot.lamp.z];
@@ -87,7 +87,7 @@ function alarmLamp(sr: SceneRoom, material: MeshBasicMaterial, dome: MeshBasicMa
   d.b(1, 1, 0, 6, 10, 2, '#ffffff');
   d.b(-1, 3, 0, 10, 6, 2, '#ffffff');
   d.b(2, 0, 0.5, 2, 1.5, 1, '#ffffff').b(1.5, -1, 0.5, 1.5, 1.2, 1, '#ffffff');
-  d.b(3.2, 4.5, 2, 1.6, 4.5, 0.3, '#e63946').b(3.2, 2.2, 2, 1.6, 1.5, 0.3, '#e63946');
+  d.b(3.2, 4.5, 2, 1.6, 4.5, 0.3, '#e5383b').b(3.2, 2.2, 2, 1.6, 1.5, 0.3, '#e5383b');
   // Bubble outline (dark, at the back).
   d.b(-1.4, 2.6, -0.3, 10.8, 6.8, 0.3, '#1d1b29').b(0.6, 0.6, -0.3, 6.8, 10.8, 0.3, '#1d1b29');
   const bubble = new Mesh(blockGeometry(d.list, 1 / V), material);

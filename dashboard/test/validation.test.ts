@@ -4,8 +4,8 @@ import sample from './fixtures/office.md?raw';
 import valid from './fixtures/valid.md?raw';
 import broken from './fixtures/broken.md?raw';
 
-const FIRST_LINK = 'https://github.com/example-org/office/issues/12';
-const FIRST_TITLE = '#14 weekly review report template';
+const FIRST_LINK = 'https://github.com/example-org/office/issues/21';
+const FIRST_TITLE = '#23 template for the monthly status report';
 
 // validateOffice decides in scripts/update-office.sh whether office.md stays after the agent run or the
 // backup is restored (through scripts/validate.mjs).
@@ -79,9 +79,9 @@ describe('validateRun', () => {
 
   it('rejects links outside https://github.com/ in tasks, contexts and comments', () => {
     const cases = [
-      sample.replace(FIRST_LINK, 'https://example.com/example-org/office/issues/12'),
+      sample.replace(FIRST_LINK, 'https://example.com/example-org/office/issues/21'),
       sample.replace(FIRST_LINK, 'https://github.com.evil.example/x'),
-      sample.replace(FIRST_LINK, 'http://github.com/example-org/office/issues/12'),
+      sample.replace(FIRST_LINK, 'http://github.com/example-org/office/issues/21'),
       sample.replace(FIRST_LINK, 'https://x@github.com/example-org'),
       withContext('see https://evil.example/?d=secret'),
       withContext('see [here](javascript:alert(1))'),
