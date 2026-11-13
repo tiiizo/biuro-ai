@@ -1,0 +1,50 @@
+# Office dashboard checks: unit tests, typecheck and build in dashboard/.
+# - Read-only token, no secrets, no artifacts, no dependency cache: in your own copy dist/
+#   contains office.md with your project data, so it never leaves the runner.
+# - npm run test:scripts is not run here: it needs macOS (plutil, BSD stat); run it locally.
+# - Actions are pinned to full commit SHAs; the version is in the comment.
+name: dashboard
+
+on:
+  pull_request:
+    paths:
+      - 'dashboard/**'
+      - 'office.md'
+      # test/sample.test.ts also parses the office.md example in the agent definition.
+      - '.claude/agents/office-manager.md'
+      - '.github/workflows/dashboard.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'dashboard/**'
+      - 'office.md'
+      - '.claude/agents/office-manager.md'
+      - '.github/workflows/dashboard.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dashboard-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          # Within engines in dashboard/package.json (^22.12.0 || ^24.0.0 || >=26.0.0).
+          node-version: '22'
+          package-manager-cache: false
+      - run: npm ci --no-audit --no-fund
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run build
