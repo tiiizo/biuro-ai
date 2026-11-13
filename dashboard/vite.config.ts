@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import type { Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
-import { EXAMPLE_FILE, OFFICE_FILE, officeSource } from './src/office-file';
+import { EXAMPLE_FILE, OFFICE_FILE, officeSource } from './src/office-file.ts';
 
 const ID = 'virtual:office-md';
 const RESOLVED = `\0${ID}`;
