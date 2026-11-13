@@ -2,7 +2,7 @@
 // A parser error = a readable message on the page instead of an empty scene.
 // Content from office.md reaches the DOM only through textContent (no innerHTML).
 // Interactions (tooltip, panel, copying and list view): src/ui/overlay.ts.
-import officeMd from 'virtual:office-md';
+import officeMd, { example as officeIsExample } from 'virtual:office-md';
 import { formatMessage, parseOffice } from './parse';
 import type { SceneRoom } from './scene/building';
 import { OfficeScene, type SceneOptions } from './scene/scene';
@@ -11,6 +11,7 @@ import { el } from './ui/dom';
 import { Overlay, roomKey, type RoomView } from './ui/overlay';
 import { furnishingWarnings } from './furnishing';
 import { linkWarnings } from './tasks';
+import { EXAMPLE_NOTE } from './office-file';
 
 /** Options from the address: ?focus=Clients&zoom=2&animation=0&today=2026-11-13 (e.g. for screenshots). */
 function optionsFromUrl(): SceneOptions {
@@ -66,9 +67,10 @@ function hideScene(hidden: boolean): void {
   refreshVisibility();
 }
 
-function load(text: string): void {
+function load(text: string, example: boolean): void {
   const result = parseOffice(text);
   header.replaceChildren(el('strong', 'AI office'));
+  if (example) header.append(el('span', EXAMPLE_NOTE, 'example-note'));
   // Warnings from the parser, links outside GitHub and furnishing (props or agents that did not fit in a room).
   const warnings = result.warnings.map(formatMessage);
   if (result.ok) {
@@ -87,7 +89,7 @@ function load(text: string): void {
   }
   if (!result.ok) {
     errorPanel.replaceChildren(
-      el('h2', 'office.md has errors'),
+      el('h2', `${example ? 'office.example.md' : 'office.md'} has errors`),
       el('pre', result.errors.map(formatMessage).join('\n')),
       el('p', 'Fix the file — the scene reloads by itself once it is saved.'),
     );
@@ -113,11 +115,15 @@ function load(text: string): void {
   overlay.setData(office, options.today);
 }
 
-load(officeMd);
+load(officeMd, officeIsExample);
 
-// Vite watches ../office.md (the officeMd plugin in vite.config.ts) and swaps the module without a page reload.
+// Vite watches ../office.md and ../office.example.md (the officeMd plugin in vite.config.ts) and swaps the
+// module without a page reload, also when office.md appears after the first update.
 if (import.meta.hot) {
   import.meta.hot.accept('virtual:office-md', (mod) => {
-    if (mod) load((mod as unknown as { default: string }).default);
+    if (mod) {
+      const m = mod as unknown as { default: string; example: boolean };
+      load(m.default, m.example);
+    }
   });
 }

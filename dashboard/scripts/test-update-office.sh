@@ -1,7 +1,8 @@
 #!/bin/bash
 # Tests of update-office.sh and generate-plist.sh without installing anything: no launchctl, no
 # ~/Library/LaunchAgents and no real `claude` (a stub replaces it). Everything happens in a temporary
-# directory; the real office.md is not touched (the last test checks that). macOS only (plutil, BSD stat).
+# directory; the real office.md and office.example.md are not touched (the last test checks that). macOS only
+# (plutil, BSD stat).
 #
 # Run: cd dashboard && npm run test:scripts   (needs npm ci, because the validator loads the parser)
 
@@ -13,7 +14,9 @@ SCRIPT="$SCRIPT_DIR/update-office.sh"
 GENERATOR="$SCRIPT_DIR/generate-plist.sh"
 TEMPLATE="$DASHBOARD/launchd/local.office-manager.plist.template"
 AGENT_FILE="$DASHBOARD/../.claude/agents/office-manager.md"
+PROJECT_SETTINGS="$DASHBOARD/../.claude/settings.json"
 REAL_OFFICE="$DASHBOARD/../office.md"
+REAL_EXAMPLE="$DASHBOARD/../office.example.md"
 INITIAL="$DASHBOARD/test/fixtures/valid.md"
 NEW="$DASHBOARD/test/fixtures/office.md"
 BROKEN="$DASHBOARD/test/fixtures/broken.md"
@@ -22,7 +25,9 @@ NODE_BIN="$(command -v node)"
 T="$(mktemp -d "${TMPDIR:-/tmp}/office-manager-test.XXXXXX")"
 trap 'rm -rf "$T"' EXIT
 
-REAL_SUM="$(shasum -a 256 "$REAL_OFFICE" | cut -d' ' -f1)"
+# office.md is git-ignored and may not exist in this clone.
+real_sums() { shasum -a 256 "$REAL_EXAMPLE" "$REAL_OFFICE" 2>/dev/null | cut -d' ' -f1; }
+REAL_SUM="$(real_sums)"
 
 OK=0
 FAILED=0
@@ -52,11 +57,13 @@ echo "stub: done"
 STUB
 chmod +x "$T/bin/claude"
 
-# node stub whose validator "does not start" (code 2, as with missing node_modules).
-cat > "$T/bin/node-broken" <<'STUB'
+# node stub whose validator "does not start" (code 2, as with missing node_modules); other scripts run normally.
+cat > "$T/bin/node-broken" <<STUB
 #!/bin/bash
-echo "node stub: cannot load the parser" >&2
-exit 2
+case "\${1:-}" in
+  *validate.mjs) echo "node stub: cannot load the parser" >&2; exit 2 ;;
+esac
+exec "$NODE_BIN" "\$@"
 STUB
 chmod +x "$T/bin/node-broken"
 
@@ -66,18 +73,21 @@ export STUB_BROKEN="$BROKEN"
 export STUB_NEW="$NEW"
 export STUB_FILE="$NEW"
 
-# A fresh test repository (git, branch main, everything committed): office.md = valid.md, copies of the
-# scripts, the parser and the agent definition (the script checks that they have no local changes),
-# node_modules = a symlink to the real one (the validator loads the parser through Vite).
+# A fresh test repository (git, branch main, everything committed): copies of the scripts, the parser, the
+# agent definition and the project settings (the script checks that they have no local changes),
+# node_modules = a symlink to the real one (the validator loads the parser through Vite). office.md = valid.md,
+# git-ignored as in the template (not committed).
 new_repo() {
   rm -rf "$T/repo" "$T/state"
   mkdir -p "$T/repo/.claude/agents" "$T/repo/.claude/agent-memory/office-manager" "$T/repo/dashboard" "$T/state"
   cp "$AGENT_FILE" "$T/repo/.claude/agents/office-manager.md"
+  cp "$PROJECT_SETTINGS" "$T/repo/.claude/settings.json"
   echo "test memory" > "$T/repo/.claude/agent-memory/office-manager/MEMORY.md"
   cp -R "$DASHBOARD/scripts" "$DASHBOARD/src" "$T/repo/dashboard/"
   cp "$DASHBOARD/package.json" "$DASHBOARD/package-lock.json" "$T/repo/dashboard/"
   ln -s "$DASHBOARD/node_modules" "$T/repo/dashboard/node_modules"
-  printf 'node_modules\n' > "$T/repo/.gitignore"
+  printf 'node_modules\n/office.md\n' > "$T/repo/.gitignore"
+  cp "$INITIAL" "$T/repo/office.example.md"
   cp "$INITIAL" "$T/repo/office.md"
   git -C "$T/repo" init -q -b main
   git -C "$T/repo" add -A
@@ -90,9 +100,11 @@ calls() { [ -f "$STUB_COUNT" ] && wc -l < "$STUB_COUNT" | tr -d ' ' || echo 0; }
 # HOME inside the test directory: the script reads ~/.claude/settings*.json, and the test must not depend
 # on the settings of whoever runs it.
 mkdir -p "$T/home"
+# Managed settings: an empty directory, so the machine's /Library/Application Support/ClaudeCode is not read.
+mkdir -p "$T/managed"
 run() {
   HOME="$T/home" OFFICE_MANAGER_CLAUDE="$T/bin/claude" OFFICE_MANAGER_NODE="${TEST_NODE:-$NODE_BIN}" OFFICE_MANAGER_STATE="$T/state" \
-    OFFICE_MANAGER_NETWORK_WAIT=0 bash "$SCRIPT" --repo "$T/repo" "$@" > "$T/log" 2>&1
+    OFFICE_MANAGER_MANAGED_DIR="${TEST_MANAGED:-$T/managed}" OFFICE_MANAGER_NETWORK_WAIT=0 bash "$SCRIPT" --repo "$T/repo" "$@" > "$T/log" 2>&1
 }
 
 # ---------- 1. dry run ----------
@@ -254,7 +266,7 @@ if [ -z "$wrongly_blocked" ]; then
 else
   fail "--disallowedTools does not block the agent's read tools" "blocked:$wrongly_blocked"
 fi
-for expected in 'mcp__claude_ai_*' 'Read(~/.ssh/**)' 'Read(~/.config/**)' 'Read(~/.claude.json)' 'Read(**/.env*)'; do
+for expected in 'mcp__claude_ai_*' 'mcp__plugin_*' 'Read(~/.ssh/**)' 'Read(~/.config/**)' 'Read(~/.claude.json)' 'Read(**/.env*)'; do
   if printf '%s' "$denied" | tr ',' '\n' | grep -qxF -- "$expected"; then
     pass "--disallowedTools contains $expected"
   else
@@ -294,6 +306,102 @@ else
   fail "a general mcp__github__* rule in the settings: claude not started" "code $code
 $(cat "$T/log")"
 fi
+# ---------- 3c. MCP servers other than github are denied ----------
+# Servers from every source: project settings (rules), .mcp.json (project scope), ~/.claude.json (user scope and
+# local scope of another project), user settings and managed-mcp.json. github itself stays allowed.
+new_repo
+printf '{"mcpServers":{"local-db":{"command":"x"},"github":{"command":"x"}}}\n' > "$T/repo/.mcp.json"
+git -C "$T/repo" add .mcp.json
+git -C "$T/repo" -c user.name=test -c user.email=test@example.invalid -c commit.gpgsign=false commit -q -m mcp
+printf '{"permissions":{"allow":["mcp__chat__send_message","mcp__github__issue_read"]}}\n' > "$T/repo/.claude/settings.local.json"
+printf '{"mcpServers":{"files":{"command":"x"},"my.docs":{"type":"http"},"reports__v2":{"command":"x"}},"projects":{"/elsewhere":{"mcpServers":{"notes":{"command":"x"}}}}}\n' \
+  > "$T/home/.claude.json"
+mkdir -p "$T/home/.claude" "$T/managed-mcp"
+printf '{"permissions":{"allow":["mcp__calendar__list_events"]}}\n' > "$T/home/.claude/settings.json"
+printf '{"mcpServers":{"company-wiki":{"type":"http"}}}\n' > "$T/managed-mcp/managed-mcp.json"
+TEST_MANAGED="$T/managed-mcp" STUB_MODE=update run
+code=$?
+denied="$(arg --disallowedTools)"
+missing=""
+for expected in mcp__local-db mcp__chat mcp__files mcp__my_docs 'mcp__reports__v2__*' mcp__notes mcp__calendar mcp__company-wiki; do
+  printf '%s' "$denied" | tr ',' '\n' | grep -qxF -- "$expected" || missing="$missing $expected"
+done
+if [ "$code" -eq 0 ] && [ -z "$missing" ] && grep -q 'MCP server "files" is not github' "$T/log"; then
+  pass "every MCP server other than github is denied (settings, .mcp.json, ~/.claude.json, managed)"
+else
+  fail "every MCP server other than github is denied" "code $code, missing:$missing
+$denied
+$(cat "$T/log")"
+fi
+github_denied=""
+for n in $(printf '%s' "$allowed" | tr ',' '\n' | grep '^mcp__github__'); do
+  denied_by_pattern "$n" && github_denied="$github_denied $n"
+done
+if ! printf '%s' "$denied" | tr ',' '\n' | grep -qE '^mcp__github(__\*)?$' && [ -z "$github_denied" ]; then
+  pass "the github server itself is not denied (its read tools stay usable)"
+else
+  fail "the github server itself is not denied" "blocked:$github_denied
+$denied"
+fi
+rm -f "$T/home/.claude.json" "$T/home/.claude/settings.json"
+rm -rf "$T/managed-mcp"
+new_repo
+OFFICE_MANAGER_NODE="$T/missing-node" HOME="$T/home" OFFICE_MANAGER_CLAUDE="$T/bin/claude" OFFICE_MANAGER_STATE="$T/state" \
+  OFFICE_MANAGER_MANAGED_DIR="$T/managed" OFFICE_MANAGER_NETWORK_WAIT=0 PATH="/usr/bin:/bin" STUB_MODE=update \
+  bash "$SCRIPT" --repo "$T/repo" > "$T/log" 2>&1
+code=$?
+if [ "$code" -eq 1 ] && [ "$(calls)" = 0 ] && grep -q "cannot list the MCP servers" "$T/log"; then
+  pass "MCP servers cannot be listed (no node): claude not started"
+else
+  fail "MCP servers cannot be listed (no node): claude not started" "code $code
+$(cat "$T/log")"
+fi
+
+# ---------- 3d. first run: no office.md yet ----------
+new_repo
+rm -f "$T/repo/office.md"
+STUB_MODE=update run
+code=$?
+if [ "$code" -eq 0 ] && cmp -s "$NEW" "$T/repo/office.md" && grep -q "first run" "$T/log" && [ ! -d "$T/state/backups" ] \
+  && cmp -s "$INITIAL" "$T/repo/office.example.md" && [ -z "$(git -C "$T/repo" status --porcelain)" ]; then
+  pass "first run: office.md created, the sample untouched, git status clean (office.md ignored)"
+else
+  fail "first run: office.md created, the sample untouched, git status clean" "code $code
+$(git -C "$T/repo" status --porcelain)
+$(cat "$T/log")"
+fi
+if grep -q "WARNING: office.md is not git-ignored" "$T/log"; then
+  fail "no warning when office.md is git-ignored" "$(cat "$T/log")"
+else
+  pass "no warning when office.md is git-ignored"
+fi
+new_repo
+printf 'node_modules\n' > "$T/repo/.gitignore"
+STUB_MODE=update run
+code=$?
+if [ "$code" -eq 0 ] && grep -q "WARNING: office.md is not git-ignored or is tracked" "$T/log"; then
+  pass "office.md not git-ignored: warning in the log"
+else
+  fail "office.md not git-ignored: warning in the log" "code $code
+$(cat "$T/log")"
+fi
+
+# ---------- 3e. the validator without a path: office.md, else the sample ----------
+new_repo
+"$NODE_BIN" "$T/repo/dashboard/scripts/validate.mjs" > "$T/log" 2>&1
+code_office=$?
+office_line="$(cat "$T/log")"
+rm -f "$T/repo/office.md"
+"$NODE_BIN" "$T/repo/dashboard/scripts/validate.mjs" > "$T/log" 2>&1
+code_example=$?
+if [ "$code_office" -eq 0 ] && printf '%s' "$office_line" | grep -q "/office.md OK" && [ "$code_example" -eq 0 ] \
+  && grep -q "office.md does not exist yet" "$T/log" && grep -q "/office.example.md OK" "$T/log"; then
+  pass "validate.mjs without a path: office.md, or office.example.md before the first update"
+else
+  fail "validate.mjs without a path: office.md, or office.example.md before the first update" "$office_line
+$(cat "$T/log")"
+fi
+
 # State for section 4: a fresh successful run.
 new_repo
 STUB_MODE=update run
@@ -466,7 +574,7 @@ fi
 # SIGTERM to the script itself during a run (launchctl bootout, Mac shutting down).
 new_repo
 HOME="$T/home" OFFICE_MANAGER_CLAUDE="$T/bin/claude" OFFICE_MANAGER_NODE="$NODE_BIN" OFFICE_MANAGER_STATE="$T/state" \
-  OFFICE_MANAGER_NETWORK_WAIT=0 STUB_MODE=file-sleep bash "$SCRIPT" --repo "$T/repo" > "$T/log" 2>&1 &
+  OFFICE_MANAGER_MANAGED_DIR="$T/managed" OFFICE_MANAGER_NETWORK_WAIT=0 STUB_MODE=file-sleep bash "$SCRIPT" --repo "$T/repo" > "$T/log" 2>&1 &
 script_pid=$!
 for _ in $(seq 1 100); do [ -f "$STUB_ARGS" ] && cmp -s "$NEW" "$T/repo/office.md" && break; sleep 0.1; done
 kill -TERM "$script_pid"
@@ -562,7 +670,7 @@ else
   fail "--dry-run also refuses outside main" "$(cat "$T/log")"
 fi
 for change in "dashboard/scripts/update-office.sh" "dashboard/scripts/validate.mjs" "dashboard/src/parse.ts" \
-  ".claude/agents/office-manager.md" "dashboard/package-lock.json"; do
+  ".claude/agents/office-manager.md" "dashboard/package-lock.json" ".claude/settings.json" "dashboard/scripts/mcp-servers.mjs"; do
   new_repo
   echo "# local change" >> "$T/repo/$change"
   STUB_MODE=update run
@@ -582,6 +690,16 @@ if [ "$code" -eq 1 ] && [ "$(calls)" = 0 ] && grep -qF "dashboard/src/new-file.t
   pass "a new, uncommitted file in dashboard/src: claude not started"
 else
   fail "a new, uncommitted file in dashboard/src: claude not started" "code $code
+$(cat "$T/log")"
+fi
+new_repo
+printf '{"mcpServers":{"local-files":{"command":"x"}}}\n' > "$T/repo/.mcp.json"
+STUB_MODE=update run
+code=$?
+if [ "$code" -eq 1 ] && [ "$(calls)" = 0 ] && grep -q "local changes in code" "$T/log" && grep -qF ".mcp.json" "$T/log"; then
+  pass "a new, uncommitted .mcp.json (project MCP server): claude not started"
+else
+  fail "a new, uncommitted .mcp.json (project MCP server): claude not started" "code $code
 $(cat "$T/log")"
 fi
 new_repo
@@ -673,11 +791,11 @@ else
   echo "skip shellcheck (not installed)"
 fi
 
-# ---------- 11. the real office.md untouched ----------
-if [ "$(shasum -a 256 "$REAL_OFFICE" | cut -d' ' -f1)" = "$REAL_SUM" ]; then
-  pass "the real office.md untouched"
+# ---------- 11. the real office.md and office.example.md untouched ----------
+if [ "$(real_sums)" = "$REAL_SUM" ]; then
+  pass "the real office.md and office.example.md untouched"
 else
-  fail "the real office.md untouched"
+  fail "the real office.md and office.example.md untouched"
 fi
 
 echo

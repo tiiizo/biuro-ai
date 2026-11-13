@@ -3,18 +3,19 @@
 # (dashboard/launchd/local.office-manager.plist.template); it can also be run by hand from a terminal.
 #
 # What it does:
-#   1. checks the clone: branch main, no local changes in the scripts, the parser, the dependencies or
-#      the agent definition (only reviewed code runs unattended);
+#   1. checks the clone: branch main, no local changes in the scripts, the parser, the dependencies, the
+#      agent definition, .claude/settings.json or .mcp.json (only reviewed code and settings run unattended);
 #   2. a lock against parallel runs, and a skip if a successful run happened less than 2 h ago (e.g. a
 #      manual kickstart + the scheduled run after the Mac wakes up);
 #   3. a backup of office.md (the 7 newest, dated), then `claude -p` with the office-manager agent and
-#      permissions from flags only: it may write only office.md, GitHub is read-only, no reads outside the
-#      clone, no hooks;
+#      permissions from flags only: it may write only office.md, GitHub is read-only, every other MCP server
+#      is denied, no reads outside the clone, no hooks;
 #   4. assessment: a successful run = claude exit code 0 + a changed office.md + strict validation
 #      (scripts/validate.mjs --strict: parser, no HTML, comment and size limits, links only
 #      https://github.com/, a new "> updated:" line). Otherwise it restores the backup and exits with 1.
-# It does not commit or push: office.md changes only locally; before a commit the owner reviews
-# `git diff office.md` (the validator checks the format, not the truth of the data).
+# It does not commit or push. office.md is git-ignored (it lists your repositories and task titles, private
+# ones included), so it stays local; before the first run it does not exist and the agent creates it
+# (office.example.md is only the fictional sample). The validator checks the format, not the truth of the data.
 #
 # Every run (except --dry-run and skips) uses the usage limits of the owner's Claude plan.
 #
@@ -38,6 +39,8 @@
 #   OFFICE_MANAGER_MAX_TURNS       --max-turns for claude (default 150)
 #   OFFICE_MANAGER_MIN_GAP_HOURS   minimum gap since the last successful run (default 2, 0 = off)
 #   OFFICE_MANAGER_NETWORK_WAIT    seconds to wait for the network after wake-up (default 120, 0 = do not check)
+#   OFFICE_MANAGER_MANAGED_DIR     directory of managed Claude Code settings scanned for MCP servers
+#                                  (default: /Library/Application Support/ClaudeCode; for tests)
 #
 # Exit codes: 0 = success or a deliberate skip (lock, gap), 1 = error or refusal (details in the log),
 # 2 = bad arguments.
@@ -152,7 +155,8 @@ VALIDATOR="$REPO/dashboard/scripts/validate.mjs"
 # - --allowedTools: without asking, only writing office.md and the read-only GitHub tools; reading files in
 #   the clone needs no approval, so bare Read/Glob/Grep are not needed (they would approve the whole disk);
 # - --disallowedTools: deny rules win over allow rules from every source, including the settings files:
-#   all GitHub MCP write tools (patterns + full names), claude.ai connectors, secrets in the home folder;
+#   all GitHub MCP write tools (patterns + full names), every other MCP server (found in the settings and MCP
+#   config files, plus all plugin servers and claude.ai connectors by pattern), secrets in the home folder;
 # - --settings: file tools do not read or write outside the clone (no allow rule lifts this), user hooks
 #   are off in an unattended run;
 # - --permission-mode dontAsk: everything that is not approved is denied instead of asking.
@@ -184,8 +188,10 @@ GITHUB_WRITE_NAMES=(issue_write add_issue_comment sub_issue_write update_issue_c
 DENIED=""
 add_deny() { DENIED="${DENIED:+$DENIED,}$1"; }
 for w in "${GITHUB_WRITE_PATTERNS[@]}" "${GITHUB_WRITE_NAMES[@]}"; do add_deny "mcp__github__$w"; done
-# claude.ai connectors (e.g. documents) can write too; the agent does not need them.
+# claude.ai connectors (e.g. documents) can write too, and plugin MCP servers (`mcp__plugin_<plugin>_<server>`)
+# cannot be listed from the config files; the agent needs neither. Neither pattern can match mcp__github__*.
 add_deny 'mcp__claude_ai_*'
+add_deny 'mcp__plugin_*'
 # Secrets in the home folder: a second layer next to the block on reads outside the clone.
 for p in '~/.ssh/**' '~/.aws/**' '~/.config/**' '~/.gnupg/**' '~/.docker/**' '~/.kube/**' \
   '~/.claude.json' '~/.netrc' '~/.npmrc' '~/.git-credentials' '~/Library/**' '**/.env*'; do
@@ -233,6 +239,37 @@ complete_denies() {
       log "WARNING: $name is in $file and is not read-only; adding it to --disallowedTools"
     done < <(grep -o 'mcp__github[A-Za-z0-9_*-]*' "$file" 2>/dev/null | sort -u)
   done
+  deny_other_mcp_servers
+}
+
+# Every MCP server other than `github` is denied at server level (`mcp__<server>` covers all its tools): the
+# owner may allow tools of other servers (chat, documents, a file system server that ignores
+# blockReadsOutsideWorkingDirectories) in the user settings, and in dontAsk mode an allow rule would run them.
+# Sources: the settings files, the project .mcp.json (connected without asking in -p mode), ~/.claude.json
+# (user and local scope, every project) and the managed settings. The office-manager agent needs only github.
+MANAGED_DIR="${OFFICE_MANAGER_MANAGED_DIR:-/Library/Application Support/ClaudeCode}"
+MCP_LIST="$REPO/dashboard/scripts/mcp-servers.mjs"
+deny_other_mcp_servers() {
+  local servers server
+  if [ -z "$NODE_BIN" ] || [ ! -x "$NODE_BIN" ] || [ ! -f "$MCP_LIST" ]; then
+    log "ERROR: cannot list the MCP servers (node: ${NODE_BIN:-not found}, $MCP_LIST); not starting claude"
+    return 1
+  fi
+  if ! servers="$("$NODE_BIN" "$MCP_LIST" "$REPO/.claude/settings.json" "$REPO/.claude/settings.local.json" \
+    "$REPO/.mcp.json" "$HOME/.claude/settings.json" "$HOME/.claude/settings.local.json" "$HOME/.claude.json" \
+    "$MANAGED_DIR/managed-settings.json" "$MANAGED_DIR/managed-mcp.json" 2>&1)"; then
+    log "ERROR: listing the MCP servers failed: $servers"
+    return 1
+  fi
+  while IFS= read -r server; do
+    [ -n "$server" ] && [ "$server" != "github" ] || continue
+    case "$server" in
+      # A name with "__" or a trailing "_" needs the wildcard form (code.claude.com/docs/en/permissions, MCP).
+      *__*|*_) add_deny "mcp__${server}__*" ;;
+      *) add_deny "mcp__${server}" ;;
+    esac
+    log "MCP server \"${server}\" is not github: denied for this run"
+  done <<< "$servers"
   return 0
 }
 
@@ -274,10 +311,12 @@ check_repo() {
 
 # The job runs code from the working tree of the clone, so only reviewed code may run unattended:
 # branch main and no local changes (new files included) in the script, the validator, the parser, the
-# dependencies and the agent definition. Changes in office.md, agent memory, reports and so on are fine.
+# dependencies, the agent definition and the project settings Claude Code loads by itself (.claude/settings.json
+# with its env and hooks, .mcp.json with project MCP servers). Changes in office.md, agent memory, reports and
+# so on are fine.
 BRANCH="main"
 GUARDED=(dashboard/scripts dashboard/src dashboard/package.json dashboard/package-lock.json
-  ".claude/agents/$AGENT.md")
+  ".claude/agents/$AGENT.md" .claude/settings.json .mcp.json)
 check_clone_state() {
   local branch changes path
   if ! command -v git > /dev/null 2>&1; then
@@ -304,6 +343,10 @@ check_clone_state() {
     log "ERROR: local changes in code that runs unattended; commit them through a PR or revert them, then run again:"
     printf '%s\n' "$changes" | sed 's/^/    /'
     return 1
+  fi
+  # office.md lists private repositories and task titles: it should stay out of git (.gitignore in the template).
+  if ! git -C "$REPO" check-ignore -q office.md 2>/dev/null || git -C "$REPO" ls-files --error-unmatch office.md > /dev/null 2>&1; then
+    log "WARNING: office.md is not git-ignored or is tracked; if this repository is public, do not commit it (see .gitignore in the template)"
   fi
   return 0
 }
@@ -452,7 +495,7 @@ if [ -f "$OFFICE" ]; then
   log "backup: $BACKUP"
   ls -1 "$BACKUPS"/office-*.md 2>/dev/null | sort -r | tail -n +8 | while IFS= read -r old; do rm -f "$old"; done
 else
-  log "WARNING: $OFFICE does not exist; the agent will create it from scratch"
+  log "first run: $OFFICE does not exist yet; the agent creates it (office.example.md is only the fictional sample)"
 fi
 
 # Restores the backup atomically: a temporary file in the repository directory (the same file system) + mv,
@@ -558,7 +601,7 @@ if [ -n "$reason" ]; then
   exit 1
 fi
 
-log "office.md updated (local change only, no commit; review git diff office.md)"
+log "office.md updated (local, git-ignored file; nothing committed)"
 echo "$NOW" > "$STAMP"
 log "end: OK"
 exit 0
