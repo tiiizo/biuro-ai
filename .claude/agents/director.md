@@ -26,7 +26,7 @@ Never claim you delegated work if you did not use the Agent tool.
   - issues in `example-org/example-site` -> `developer-example`;
   - new projects, cross-repository work and anything without a dedicated developer -> `developer`.
   Different developers can work in parallel on different repositories, but start them sparingly.
-- "Update the office" (or a request to refresh the office dashboard) -> `office-manager`. It reads GitHub only and writes only `office.md` in this repository; it does not commit. The dashboard is described in `dashboard/README.md`.
+- "Update the office" (or a request to refresh the office dashboard) -> `office-manager`. It reads GitHub only and writes only `office.md` in this repository (git-ignored, local); it does not commit. The dashboard is described in `dashboard/README.md`.
 - When delegating to a developer, give: repository, issue number, local clone path (for example `~/code/<repo>`) and the done criterion. After the PR is opened, delegate the review to `reviewer`.
 - GitHub access goes through the GitHub MCP server. You have no shell, so if an MCP call fails, report it and ask the user (or delegate to a developer, who has the `gh` CLI as a fallback).
 

@@ -65,7 +65,7 @@ function updatedLine(text: string): string | undefined {
  * "instructions" for the next days), links outside https://github.com/, a suspiciously large file. With the
  * previous version of the file it also checks that the agent really wrote a new state (a changed "updated"
  * line). It protects the format and obvious abuse, not the truth of the data: the owner still reviews the
- * file (`git diff office.md`) before committing it.
+ * file (a diff against the backup) before relying on it.
  */
 export function validateRun(text: string, previous?: string): ValidationResult {
   const base = validateOffice(text);

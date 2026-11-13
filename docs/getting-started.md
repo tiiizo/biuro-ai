@@ -3,6 +3,7 @@
 ## Requirements
 
 - [Claude Code](https://code.claude.com/docs/en/setup), installed with one of the official methods from that page.
+- Optional, for the office dashboard: Node.js `^22.12.0`, `^24` or `>=26`.
 - A Claude plan that includes Claude Code, or an API key. Subagents share your usage limits, so a director that starts many specialists uses them up faster.
 - Optional, for the GitHub workflow:
   - the [GitHub MCP server](https://github.com/github/github-mcp-server) registered in Claude Code under the name `github` (see below);
@@ -60,3 +61,4 @@ proposed priorities for this week. Wait for my approval before delegating.
 3. Put briefs and checklists into `knowledge/<agent-name>/`.
 4. Review `.claude/settings.json` and add machine-specific rules to `.claude/settings.local.json` (git-ignored); see `.claude/settings.local.json.example`.
 5. On GitHub: protect the default branch (`SECURITY.md`) and create the labels from `.github/LABELS.md`.
+6. Office dashboard: `office.md` (written by `office-manager`) lists your repositories and task titles, private ones included. It is git-ignored; if your copy is public, do not commit it and do not publish `dashboard/dist/`.

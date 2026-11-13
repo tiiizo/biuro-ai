@@ -8,7 +8,7 @@ A **director** agent plans the work and delegates it to specialist subagents (pr
 
 This setup has been used to run several real projects (web, mobile, content). This repository is the generic, cleaned-up template: no project data, no memory, no reports.
 
-**Status:** basic version (v0.x). Expect the prompts and permission rules to change. Tested with Claude Code 2.1.311 on macOS (October 2026).
+**Status:** basic version (v0.x). Expect the prompts and permission rules to change. Tested with Claude Code 2.1.311 on macOS (October 2026). The launchd flags of the office dashboard follow the Claude Code 2.1.323 documentation (November 2026); the script is tested with a stub instead of a real `claude` run.
 
 ## Office dashboard
 
@@ -20,13 +20,15 @@ A local, isometric pixel-art view of the whole office. Every repository is a roo
 |---|---|
 | ![Close-up of a room with agents at their desks](docs/screenshots/room-closeup.png) | ![Side panel with all tasks of a room](docs/screenshots/panel.png) |
 
-The data comes from `office.md` in the repository root. The `office-manager` agent writes it from GitHub (read-only), and the dashboard reloads on every save. The `office.md` shipped here describes a fictional company, so you can try it right away:
+The data comes from `office.md` in the repository root. The `office-manager` agent writes it from GitHub (read-only), and the dashboard reloads on every save. Until the first update the dashboard shows `office.example.md`, a fictional company, with a "showing example data" note, so you can try it right away. It needs Node.js `^22.12.0`, `^24` or `>=26`:
 
 ```sh
 cd dashboard && npm ci && npm run dev
 ```
 
-Then ask the director to "update the office". An optional daily run with launchd (macOS) is described in [dashboard/README.md](dashboard/README.md), together with the `office.md` format and all features.
+Then, in another terminal in the repository root, start `claude --agent director` and ask it to "update the office". This needs the GitHub MCP server registered under the name `github` (step 2 of the [Quick start](#quick-start)). An optional daily run with launchd (macOS) is described in [dashboard/README.md](dashboard/README.md), together with the `office.md` format and all features.
+
+> **Do not commit `office.md` if your repository is public.** After the first update it lists your repositories and task titles, private ones included. It is git-ignored by default; keep it that way.
 
 ## How it works
 
@@ -86,7 +88,7 @@ SECURITY.md                threat model and what really protects you
 .claude/agents/            one file per agent
 knowledge/<agent>/         curated input you maintain
 reports/                   results you keep (git-ignored except README)
-office.md                  data for the office dashboard (fictional sample)
+office.example.md          fictional sample for the office dashboard (your office.md is git-ignored)
 dashboard/                 isometric office dashboard (Vite, three.js)
 docs/                      how it works and how to extend it
 examples/                  a sample task and a sample report (fictional)

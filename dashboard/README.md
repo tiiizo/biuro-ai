@@ -5,14 +5,19 @@ floor, and the agents sit at their desks. Rooms grow with the number of open iss
 alarm lamp lights up when a blocking task or an owner decision has waited too long.
 
 The source of truth is `office.md` in the repository root. The `office-manager` agent
-(`.claude/agents/office-manager.md`) writes it from GitHub data; the dashboard only reads it. The `office.md`
-in this template describes a fictional company (Acme Studio) so you can try the dashboard right away.
+(`.claude/agents/office-manager.md`) writes it from GitHub data; the dashboard only reads it. `office.md` is
+git-ignored: after the first update it lists your repositories and task titles, private ones included, so it
+stays on your machine. Until it exists, the dashboard shows `office.example.md`, a fictional company (Acme
+Studio), with a visible "showing example data" note, so you can try it right away.
+
+> **Public repository?** Do not commit `office.md` (do not remove it from `.gitignore`, do not `git add -f` it).
+> Do not publish `dist/` either: `npm run build` embeds the file.
 
 ![The whole building](../docs/screenshots/building.png)
 
 | Room close-up | Tooltip |
 |---|---|
-| ![Close-up of the Mobile app room](../docs/screenshots/room-closeup.png) | ![Tooltip above a room](../docs/screenshots/tooltip.png) |
+| ![Close-up of the Weather app room](../docs/screenshots/room-closeup.png) | ![Tooltip above a room](../docs/screenshots/tooltip.png) |
 
 | Side panel | List view |
 |---|---|
@@ -23,11 +28,11 @@ in this template describes a fictional company (Acme Studio) so you can try the 
 ```bash
 cd dashboard
 npm ci             # dependencies exactly from package-lock.json
-npm run dev        # the scene on localhost (reads ../office.md and reloads after every save)
-npm test           # vitest run (test data in test/fixtures/; ../office.md only in the smoke test)
+npm run dev        # the scene on localhost (reads ../office.md, else ../office.example.md; reloads after every save)
+npm test           # vitest run (test data in test/fixtures/; ../office.example.md in the smoke test, never ../office.md)
 npm run typecheck  # tsc --noEmit
 npm run build      # typecheck + vite build -> dist/
-npm run validate   # validates ../office.md with the parser (exit 0 = OK, 1 = errors, 2 = validation could not run)
+npm run validate   # validates ../office.md (else ../office.example.md) with the parser (exit 0 = OK, 1 = errors, 2 = validation could not run)
 npm run validate -- --strict ../office.md  # + the rules for unattended runs (HTML, comments, links, size)
 npm run test:scripts  # tests of the optional launchd script (macOS only; stub claude, temp directory, installs nothing)
 ```
@@ -37,8 +42,8 @@ TypeScript 7). Dependencies: three, zod, vite, vitest, typescript, @types/three.
 
 CI (`.github/workflows/dashboard.yml`, GitHub Actions, ubuntu-latest, Node 22): `npm ci`, `npm test`,
 `npm run typecheck` and `npm run build` on pull requests and pushes to `main` that change `dashboard/**`,
-`office.md`, the office-manager definition or the workflow itself. Read-only token, actions pinned to commit
-SHAs, no secrets, artifacts or cache (`dist/` contains your `office.md`). `npm run test:scripts` needs macOS
+`office.example.md`, the office-manager definition or the workflow itself. Read-only token, actions pinned to
+commit SHAs, no secrets, artifacts or cache. CI never sees your `office.md` (git-ignored). `npm run test:scripts` needs macOS
 (`plutil`, BSD `stat`), so it runs locally.
 
 ## Scene
@@ -177,7 +182,7 @@ throws.
 - [..] staging
 ```
 
-Full sample: [`../office.md`](../office.md) (fictional data).
+Full sample: [`../office.example.md`](../office.example.md) (fictional data).
 
 ### Rules
 
@@ -283,8 +288,8 @@ cd dashboard && npm run validate                 # or: npm run validate -- path/
 cd dashboard && npx vitest run test/sample.test.ts
 ```
 
-The sample test only checks that `office.md` validates without errors; it does not depend on the list or order
-of rooms. The same test file also checks the examples in this README and in the agent instructions
+The sample test only checks that `office.example.md` validates without errors or warnings; it does not depend on
+the list or order of rooms. Your own `office.md` is not read by the tests: check it with `npm run validate`. The same test file also checks the examples in this README and in the agent instructions
 (`.claude/agents/office-manager.md`), which the agent copies because it cannot run the parser. Detailed structure
 assertions use the fixture `test/fixtures/valid.md`.
 
@@ -294,7 +299,8 @@ assertions use the fixture `test/fixtures/valid.md`.
 ## Updating office.md
 
 Ask the director: *"Update the office."* It delegates to `office-manager`, which reads GitHub (read-only), writes
-only `office.md` and does not commit. Review `git diff office.md` and commit it yourself if you want to keep it.
+only `office.md` and does not commit. On the first update it creates `office.md`; the page switches from the
+example to your data by itself. The file is git-ignored, so it never ends up in a commit by accident.
 Requirements: the GitHub MCP server registered under the name `github` (see `docs/getting-started.md`).
 
 ## Optional: daily update with launchd (macOS)
@@ -314,9 +320,10 @@ validation after the run. Nothing in the repository installs the job; you do it 
 ### What the script does
 
 1. **Clone state.** It refuses (exit 1, a log entry) when the clone is not on `main`, a merge/rebase is in
-   progress, or `dashboard/scripts`, `dashboard/src`, `dashboard/package.json`, `dashboard/package-lock.json` or
-   `.claude/agents/office-manager.md` have local changes (new files included). Only reviewed code may run
-   unattended. Changes in `office.md`, agent memory, reports and so on are fine.
+   progress, or `dashboard/scripts`, `dashboard/src`, `dashboard/package.json`, `dashboard/package-lock.json`,
+   `.claude/agents/office-manager.md`, `.claude/settings.json` or `.mcp.json` have local changes (new files
+   included). Only reviewed code and project settings may run unattended. Changes in `office.md`, agent memory,
+   reports and so on are fine. A `WARNING` line appears if `office.md` is not git-ignored or is tracked.
 2. **Lock** (`~/Library/Application Support/biuro-ai/office-manager.lock`): a second parallel run ends at once.
    The lock counts as active only if its PID is alive and is this script (after a restart the PID may belong to
    another program).
@@ -326,7 +333,8 @@ validation after the run. Nothing in the repository installs the job; you do it 
 4. It waits up to 2 min for the network (it is sometimes not ready after wake-up) and checks that the validator
    works. If not (e.g. no `npm ci`), it ends without starting `claude`.
 5. **Backup** of `office.md` to `~/Library/Application Support/biuro-ai/backups/office-YYYY-MM-DD_HHMMSS.md`
-   (the 7 newest are kept).
+   (the 7 newest are kept). On the first run there is no `office.md` yet: the agent creates it and there is
+   nothing to back up.
 6. **Runs in the clone** (time limit 20 min, then SIGTERM and SIGKILL after 30 s; `--max-turns 150`).
    Permissions come only from flags; the `.claude/settings*.json` files are not changed:
 
@@ -335,7 +343,7 @@ validation after the run. Nothing in the repository installs the job; you do it 
      --agent office-manager --permission-mode dontAsk \
      --tools Read,Glob,Grep,Write,Edit \
      --allowedTools 'Edit(/office.md),mcp__github__get_me,mcp__github__search_repositories,mcp__github__list_issues,mcp__github__issue_read,mcp__github__list_pull_requests,mcp__github__pull_request_read,mcp__github__search_issues' \
-     --disallowedTools 'mcp__github__*_write,mcp__github__create_*,mcp__github__update_*,…,mcp__github__add_issue_comment,…,mcp__claude_ai_*,Read(~/.ssh/**),Read(~/.config/**),…' \
+     --disallowedTools 'mcp__github__*_write,mcp__github__create_*,mcp__github__update_*,…,mcp__github__add_issue_comment,…,mcp__claude_ai_*,mcp__plugin_*,mcp__<other server>,…,Read(~/.ssh/**),Read(~/.config/**),…' \
      --settings '{"permissions":{"blockReadsOutsideWorkingDirectories":true,"blockWritesOutsideWorkingDirectories":true},"disableAllHooks":true}' \
      --max-turns 150 --output-format text
    ```
@@ -354,9 +362,17 @@ validation after the run. Nothing in the repository installs the job; you do it 
      disk). An `Edit(...)` rule covers Write too; `/office.md` in a CLI flag is relative to the clone.
    - `--disallowedTools`: deny rules win over allow rules from every source, including your
      `.claude/settings.local.json`. It blocks all GitHub MCP write tools (family patterns + full names),
-     claude.ai connectors and secret files in the home folder. A GitHub tool allowed in your settings files that
-     no pattern catches is added to the deny list (a `WARNING` line in the log); a general `mcp__github__*` rule
-     in the settings stops the run.
+     every MCP server other than `github`, and secret files in the home folder. A GitHub tool allowed in your
+     settings files that no pattern catches is added to the deny list (a `WARNING` line in the log); a general
+     `mcp__github__*` rule in the settings stops the run.
+   - Other MCP servers: `scripts/mcp-servers.mjs` lists every server named in the project and user settings,
+     `.mcp.json`, `~/.claude.json` (user scope and the local scope of every project) and the managed settings
+     (`/Library/Application Support/ClaudeCode/managed-settings.json`, `managed-mcp.json`). Each one except
+     `github` gets a server-level deny (`mcp__<server>`, which covers all its tools; a log line per server).
+     Plugin servers and claude.ai connectors are denied by pattern (`mcp__plugin_*`, `mcp__claude_ai_*`). Without
+     this, an allow rule you keep for another server (chat, documents, a file-system server that ignores
+     `blockReadsOutsideWorkingDirectories`) would run in `dontAsk` mode. A server added in a way the script cannot
+     see (e.g. a new config location) is not covered: check `--dry-run` after changing your MCP setup.
    - `--settings`: the file tools do not read or write outside the clone (no allow rule lifts this), and user
      hooks do not run in the unattended run.
    - No `--dangerously-skip-permissions`.
@@ -374,7 +390,7 @@ validation after the run. Nothing in the repository installs the job; you do it 
    In every other case (a `claude` error, the time limit, a signal, an unchanged file, validation) the script
    saves the candidate as `office.md.rejected`, restores the backup (atomically: temporary file + `mv`), exits
    with 1 and writes no success timestamp.
-8. It does not commit or push: `office.md` changes only locally; committing is your decision.
+8. It does not commit or push. `office.md` is git-ignored and changes only locally.
 
 Exit codes: 0 = success or a deliberate skip, 1 = error or refusal (details in the log), 2 = bad arguments.
 Settings (paths to `claude`/`node`, limits, state directory) are described in the script header
@@ -382,7 +398,7 @@ Settings (paths to `claude`/`node`, limits, state directory) are described in th
 
 ### Installation
 
-In your main clone of the office, on `main`, with local `office.md` changes committed or stashed:
+In your main clone of the office, on `main`:
 
 ```bash
 cd ~/code/office                           # your clone
@@ -395,16 +411,16 @@ bash dashboard/scripts/update-office.sh --dry-run
 
 # 2. One supervised run before installing (uses your plan's limits, a few to a dozen minutes)
 bash dashboard/scripts/update-office.sh --force; echo "exit code: $?"
-git diff --stat office.md && git diff office.md
+diff "$(ls -1t ~/Library/Application\ Support/biuro-ai/backups/office-*.md | head -n 1)" office.md   # nothing to compare on the first run
 ```
 
 After the supervised run check:
 
 - exit code 0 and the last line `end: OK` (the log goes to the terminal);
 - no line `WARNING: … adding it to --disallowedTools`, or that you understand where it came from;
-- `git diff office.md`: a new `> updated:` line (UTC), `open` values that match GitHub, no foreign links and no
-  odd comments;
-- `git status --short`: no new or changed files except `office.md` (the agent cannot write anywhere else);
+- `office.md` (or its diff against the newest backup): a new `> updated:` line (UTC), `open` values that match
+  GitHub, no foreign links and no odd comments;
+- `git status --short`: no new or changed files (`office.md` is ignored; the agent cannot write anywhere else);
 - with exit code 1: the reason in the `ERROR: …` line, the candidate in
   `~/Library/Application Support/biuro-ai/office.md.rejected`, `office.md` restored from the backup.
   Install only after a successful supervised run.
@@ -437,19 +453,17 @@ If a successful run happened less than 2 h ago, the script skips it ("skipping: 
 another test: `rm ~/Library/Application\ Support/biuro-ai/last-success`, or run the script from a terminal:
 `bash dashboard/scripts/update-office.sh --force`.
 
-### Daily office.md and git pull
+### Reviewing the daily office.md
 
-After installation `office.md` in your main clone changes locally every day. When someone commits `office.md` on
-`main` elsewhere, `git pull --ff-only` stops with "Your local changes … would be overwritten". Then:
+`office.md` is git-ignored, so `git pull --ff-only` never conflicts with the daily run. To see what changed:
 
-- **review and keep** today's version: `git diff office.md`, then
-  `git add office.md && git commit -m "office.md: update"` and `git pull --ff-only` again, or
-- **set it aside**: `git stash push office.md`, `git pull --ff-only`, then `git stash drop` (the next run
-  regenerates the file anyway) or `git stash pop` if you want to keep it.
+```bash
+diff "$(ls -1t ~/Library/Application\ Support/biuro-ai/backups/office-*.md | head -n 1)" office.md
+```
 
-**Before every commit of `office.md` review `git diff office.md`.** The validator checks the format and obvious
-abuse, not the truth of the data: a formally valid file can have wrong numbers or text planted by an issue.
-If your repository is public, remember that a committed `office.md` publishes the titles of your tasks.
+The validator checks the format and obvious abuse, not the truth of the data: a formally valid file can have
+wrong numbers or text planted by an issue. If you ever decide to version `office.md` in a **private** repository,
+remove it from `.gitignore` there and review the diff before every commit; in a public repository never commit it.
 
 ### Logs and state
 
@@ -496,5 +510,5 @@ rm -r ~/Library/Application\ Support/biuro-ai ~/Library/Logs/biuro-ai
   reaches the agent. The flags block writes to GitHub, reads outside the clone and writes outside `office.md`; the
   validator rejects HTML, foreign links, long comments and oversized files. What remains is **false content in a
   valid format** (made-up tasks, wrong numbers, misleading context) and copying content of other files **inside
-  the clone** (e.g. agent memory) into `office.md`. So always review `git diff office.md` before committing, and
-  keep `--with-memory` off.
+  the clone** (e.g. agent memory) into `office.md`. So review the file (or its diff against the backup) before
+  you rely on it or show it to anyone, and keep `--with-memory` off.
