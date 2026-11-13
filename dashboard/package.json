@@ -1,0 +1,29 @@
+{
+  "name": "office-dashboard",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Isometric pixel-art dashboard of the AI office: office.md parser, validator and scene.",
+  "engines": {
+    "node": "^22.12.0 || ^24.0.0 || >=26.0.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "validate": "node scripts/validate.mjs",
+    "test:scripts": "bash scripts/test-update-office.sh"
+  },
+  "dependencies": {
+    "three": "^0.187.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/three": "^0.187.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0"
+  }
+}
