@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  OPTIONAL, macOS only. launchd job template: a daily run of the office-manager agent.
+  Do not install it by hand: dashboard/scripts/generate-plist.sh creates the file with the paths filled in;
+  instructions in dashboard/README.md (section "Optional: daily update with launchd (macOS)").
+  The generator fills in __REPO__, __HOME__ and __PATH__; it changes the time (default 07:30 local time)
+  with --hour/--minute.
+  No RunAtLoad: the job does not start at login or at bootstrap, only at the scheduled time.
+  If the Mac sleeps at that time, launchd starts the job once after wake-up (it merges missed runs into
+  one); the script also skips a run if a successful one happened less than 2 h ago. If the Mac is off at
+  that time, the run is lost until the next day.
+  ProcessType Background + LowPriorityIO: the run after wake-up does not compete with the owner's work.
+  launchd does not create the log directory: before installing, `mkdir -p ~/Library/Logs/biuro-ai`.
+-->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>local.office-manager</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/bash</string>
+		<string>__REPO__/dashboard/scripts/update-office.sh</string>
+		<string>--repo</string>
+		<string>__REPO__</string>
+	</array>
+	<key>WorkingDirectory</key>
+	<string>__REPO__</string>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>__PATH__</string>
+		<key>OFFICE_MANAGER_LOG</key>
+		<string>__HOME__/Library/Logs/biuro-ai/office-manager.log</string>
+	</dict>
+	<key>ProcessType</key>
+	<string>Background</string>
+	<key>LowPriorityIO</key>
+	<true/>
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Hour</key>
+		<integer>7</integer>
+		<key>Minute</key>
+		<integer>30</integer>
+	</dict>
+	<key>StandardOutPath</key>
+	<string>__HOME__/Library/Logs/biuro-ai/office-manager.log</string>
+	<key>StandardErrorPath</key>
+	<string>__HOME__/Library/Logs/biuro-ai/office-manager.log</string>
+</dict>
+</plist>

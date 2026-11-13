@@ -29,11 +29,22 @@ Agent memory and prompt instructions are not a security boundary either.
 5. **Secret scanning.** `.github/workflows/gitleaks.yml` scans every push to `main` and every pull request. Repositories owned by a GitHub organization need a free `GITLEAKS_LICENSE` secret; personal accounts do not. Note that `gitleaks/gitleaks-action` is distributed under its own end-user license agreement (EULA, `LICENSE.txt` in the action's repository), unlike the MIT-licensed `gitleaks` CLI; read it before using the action in an organization, or run the CLI directly in the workflow instead. Also enable GitHub's own secret scanning and push protection if available.
 6. **Sandboxing.** For untrusted work, run Claude Code in a container or VM, or enable its sandbox mode, so a bypassed rule cannot reach your whole machine.
 
+## Optional unattended run (office dashboard)
+
+`dashboard/scripts/update-office.sh` can run the `office-manager` agent once a day through launchd (macOS) with `claude -p`, so nobody approves its tool calls. It is off until you install it. What limits it:
+
+- permissions come only from command-line flags in `dontAsk` mode: write only `office.md`, read-only GitHub tools, no shell or web tools, no file reads or writes outside the clone, no hooks;
+- every MCP server other than `github` found in your settings, `.mcp.json`, `~/.claude.json` and managed settings is denied, plus all plugin servers and claude.ai connectors by pattern; servers configured somewhere the script cannot see are not covered, so check `--dry-run` after changing your MCP setup;
+- it refuses to start off `main` or with local changes in its own code, the agent definition, `.claude/settings.json` or `.mcp.json`;
+- a strict validator rejects HTML, links outside `https://github.com/`, long comments and oversized files, and restores the previous `office.md`.
+
+What remains: prompt injection through issue and pull request text can still produce **false content in a valid format**, every run uses your plan's limits, and `office.md` lists your repositories and task titles, private ones included. It is git-ignored; do not commit it to a public repository. Review it before you rely on it or show it to anyone.
+
 ## Public repositories
 
 If your copy of this template is public:
 
 - everything you push is public immediately, including `agent/*` branches, commit author emails and PR descriptions, before anything is merged;
 - set a no-reply commit email for the repository (`git config user.email <id>+<login>@users.noreply.github.com`);
-- keep agent memory and reports out of git (the default `.gitignore` does this);
+- keep agent memory, reports and the office dashboard's `office.md` out of git (the default `.gitignore` does this);
 - scan the tree and history for personal data, local paths and secrets before the first push.

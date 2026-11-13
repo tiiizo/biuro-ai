@@ -11,6 +11,7 @@
 | Reports | `reports/` | results you want to keep |
 | Permissions | `.claude/settings.json` | deny / allow / ask rules and environment |
 | GitHub conventions | `.github/` | issue and PR templates, labels, secret scanning |
+| Office dashboard | `dashboard/`, `office.md` | local isometric view of all repositories; `office-manager` writes `office.md` (git-ignored), `office.example.md` is the fictional sample |
 
 ## Flow
 
@@ -38,6 +39,10 @@ flowchart LR
 - `tools: Agent(a, b, ...)` in `director.md` limits which subagents the director can start. This restriction applies only when the director runs as the main thread (`claude --agent director`). Subagents cannot start further subagents.
 - `CLAUDE_CODE_FORK_SUBAGENT=0` in `.claude/settings.json` turns off forked subagents, so the director waits for each specialist's result instead of continuing on its own. JSON has no comments, which is why this is documented here.
 - Several developers can work at the same time on different repositories. In the same repository use separate `git worktree` directories so agents do not switch branches under each other.
+
+## Office dashboard and the optional unattended run
+
+`office-manager` reads open issues and pull requests (GitHub read-only) and writes only `office.md`, which the dashboard in `dashboard/` renders. The director starts it on "update the office". Optionally, on macOS, launchd runs it once a day without supervision (`claude -p`, `dashboard/scripts/update-office.sh`): permissions come only from command-line flags, every MCP server other than `github` is denied, file tools stay inside the clone, and a strict validator restores the previous file when the result is wrong. Threats and limits: [`SECURITY.md`](../SECURITY.md#optional-unattended-run-office-dashboard), details: [`dashboard/README.md`](../dashboard/README.md).
 
 ## Developers per project
 

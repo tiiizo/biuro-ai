@@ -17,3 +17,8 @@ CLAUDE.local.md
 # Work output (keep README)
 reports/*
 !reports/README.md
+
+# Office dashboard data: written by the office-manager agent, lists your repositories and task titles
+# (private ones included). The fictional sample is office.example.md.
+/office.md
+/.office.md.restoring.*
